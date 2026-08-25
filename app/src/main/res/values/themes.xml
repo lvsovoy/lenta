@@ -19,6 +19,14 @@
     <style name="Theme.Lenta.AppBarOverlay" parent="ThemeOverlay.Material3.Dark.ActionBar" />
     <style name="Theme.Lenta.PopupOverlay" parent="ThemeOverlay.Material3.Light" />
 
+    <!-- Dialog themes -->
+    <style name="Theme.Lenta.FullScreenDialog" parent="Theme.Material3.DayNight.Dialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">?android:attr/colorBackground</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
     <!-- Pure monochrome fullscreen theme for media viewer -->
     <style name="Theme.Lenta.MediaViewer" parent="Theme.Material3.Dark.NoActionBar">
         <item name="android:windowBackground">@color/black</item>

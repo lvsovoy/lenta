@@ -3,13 +3,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.lenta"
+    namespace = "me.lesovoy.lenta"
     compileSdk {
         version = release(37)
     }
 
     defaultConfig {
-        applicationId = "com.example.lenta"
+        applicationId = "me.lesovoy.lenta"
         minSdk = 33
         targetSdk = 37
         versionCode = 1

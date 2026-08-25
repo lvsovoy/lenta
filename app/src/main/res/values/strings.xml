@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Lenta</string>
     <string name="nav_files">Files</string>
+    <string name="files_drawer">Files</string>
     <string name="nav_local">Local Files</string>
     <string name="nav_nextcloud">Nextcloud</string>
     <string name="nav_settings">Settings</string>
@@ -20,9 +21,23 @@
     <string name="add_source">Add Source</string>
     <string name="add_source_summary">Connect SMB, WebDAV, Google Drive, or more</string>
     <string name="add_source_coming_soon">Additional storage providers will be supported in an upcoming update</string>
+    <string name="remove_source">Remove Source</string>
+    <string name="remove_source_dialog_title">Remove Source</string>
+    <string name="remove_source_dialog_message">Are you sure you want to remove \"%1$s\"?</string>
+    <string name="remove_source_confirm">Remove</string>
+    <string name="remove_source_cancel">Cancel</string>
+    <string name="source_removed">Source \"%1$s\" removed</string>
 
     <string name="pref_sources">Sources</string>
     <string name="pref_sources_summary">Configure storage backends and cloud services</string>
+    <string name="pref_category_sources">Sources</string>
+    <string name="pref_category_sources_summary">Configure storage backends and cloud accounts</string>
+    <string name="pref_category_browsing">Browsing &amp; Playback</string>
+    <string name="pref_category_browsing_summary">File visibility and media playback preferences</string>
+    <string name="pref_category_storage">Storage &amp; Cache</string>
+    <string name="pref_category_storage_summary">Manage cached media thumbnails and disk storage</string>
+    <string name="pref_category_appearance">Appearance</string>
+    <string name="pref_category_appearance_summary">Theme preferences and dynamic color palettes</string>
 
     <string name="storage_internal">Internal Storage</string>
     <string name="storage_pictures">Pictures</string>

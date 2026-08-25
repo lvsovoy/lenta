@@ -7,25 +7,25 @@
 
     <fragment
         android:id="@+id/nav_files"
-        android:name="com.example.lenta.ui.files.FilesFragment"
+        android:name="me.lesovoy.lenta.ui.files.FilesFragment"
         android:label="@string/nav_files"
         tools:layout="@layout/fragment_files" />
 
     <fragment
         android:id="@+id/nav_local"
-        android:name="com.example.lenta.ui.browser.LocalBrowserFragment"
+        android:name="me.lesovoy.lenta.ui.browser.LocalBrowserFragment"
         android:label="@string/nav_local"
         tools:layout="@layout/fragment_local_browser" />
 
     <fragment
         android:id="@+id/nav_nextcloud"
-        android:name="com.example.lenta.ui.nextcloud.NextcloudFragment"
+        android:name="me.lesovoy.lenta.ui.nextcloud.NextcloudFragment"
         android:label="@string/nav_nextcloud"
         tools:layout="@layout/fragment_nextcloud" />
 
     <fragment
         android:id="@+id/nav_settings"
-        android:name="com.example.lenta.ui.settings.SettingsFragment"
+        android:name="me.lesovoy.lenta.ui.settings.SettingsFragment"
         android:label="@string/nav_settings"
         tools:layout="@layout/fragment_settings" />
 </navigation>
