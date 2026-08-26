@@ -223,11 +223,17 @@ class OneDriveClient(override val source: StorageSource) : RemoteFileClient {
     }
 
     private fun getMediaTypeFromMime(mimeType: String): MediaType? {
+        val lower = mimeType.lowercase(Locale.ROOT)
         return when {
-            mimeType == "image/gif" -> MediaType.GIF
-            mimeType.startsWith("image/") -> MediaType.IMAGE
-            mimeType.startsWith("video/") -> MediaType.VIDEO
-            mimeType.contains("comic") || mimeType.contains("cbz") || mimeType.contains("cbr") -> MediaType.CBZ
+            lower == "image/gif" -> MediaType.GIF
+            lower.startsWith("image/") -> MediaType.IMAGE
+            lower.startsWith("video/") -> MediaType.VIDEO
+            lower.startsWith("audio/") -> MediaType.AUDIO
+            lower.contains("presentation") || lower.contains("powerpoint") -> MediaType.PRESENTATION
+            lower.contains("epub") || lower.contains("fb2") || lower.contains("fictionbook") || lower.contains("mobipocket") -> MediaType.EBOOK
+            lower.startsWith("text/") && (lower.contains("plain") || lower.contains("markdown")) -> MediaType.EBOOK
+            lower.contains("comic") || lower.contains("cbz") || lower.contains("cbr") -> MediaType.CBZ
+            lower.contains("document") || lower.contains("word") || lower.contains("pdf") || lower.contains("spreadsheet") || lower.contains("excel") -> MediaType.DOCUMENT
             else -> null
         }
     }

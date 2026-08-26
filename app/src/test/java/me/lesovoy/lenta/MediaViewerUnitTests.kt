@@ -131,8 +131,17 @@ class MediaViewerUnitTests {
         assertEquals(MediaType.CBZ, LocalMediaRepository.getMediaTypeFromExtension("cbz"))
         assertEquals(MediaType.CBZ, LocalMediaRepository.getMediaTypeFromExtension("cbr"))
         assertEquals(MediaType.CBZ, LocalMediaRepository.getMediaTypeFromExtension("zip"))
-        assertNull(LocalMediaRepository.getMediaTypeFromExtension("pdf"))
-        assertNull(LocalMediaRepository.getMediaTypeFromExtension("txt"))
+        assertEquals(MediaType.DOCUMENT, LocalMediaRepository.getMediaTypeFromExtension("pdf"))
+        assertEquals(MediaType.DOCUMENT, LocalMediaRepository.getMediaTypeFromExtension("docx"))
+        assertEquals(MediaType.DOCUMENT, LocalMediaRepository.getMediaTypeFromExtension("doc"))
+        assertEquals(MediaType.EBOOK, LocalMediaRepository.getMediaTypeFromExtension("epub"))
+        assertEquals(MediaType.EBOOK, LocalMediaRepository.getMediaTypeFromExtension("fb2"))
+        assertEquals(MediaType.EBOOK, LocalMediaRepository.getMediaTypeFromExtension("txt"))
+        assertEquals(MediaType.PRESENTATION, LocalMediaRepository.getMediaTypeFromExtension("pptx"))
+        assertEquals(MediaType.PRESENTATION, LocalMediaRepository.getMediaTypeFromExtension("ppt"))
+        assertEquals(MediaType.AUDIO, LocalMediaRepository.getMediaTypeFromExtension("mp3"))
+        assertEquals(MediaType.AUDIO, LocalMediaRepository.getMediaTypeFromExtension("flac"))
+        assertNull(LocalMediaRepository.getMediaTypeFromExtension("unknown_binary"))
     }
 
     @Test

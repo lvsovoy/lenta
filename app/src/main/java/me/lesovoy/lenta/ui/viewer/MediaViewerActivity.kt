@@ -386,17 +386,21 @@ class MediaViewerActivity : AppCompatActivity() {
         hideSystemBars()
     }
 
+    private fun isPaginatedMediaType(type: MediaType?): Boolean {
+        return type == MediaType.CBZ || type == MediaType.DOCUMENT || type == MediaType.EBOOK || type == MediaType.PRESENTATION
+    }
+
     private fun updateUiForMediaType(type: MediaType?) {
         when (type) {
             MediaType.IMAGE -> {
                 binding.bottomScrubberContainer.visibility = View.GONE
             }
-            MediaType.VIDEO, MediaType.GIF -> {
+            MediaType.VIDEO, MediaType.GIF, MediaType.AUDIO -> {
                 binding.bottomScrubberContainer.visibility = View.VISIBLE
                 binding.tvScrubInfo.visibility = View.GONE
                 binding.bottomSeekBar.progress = 0
             }
-            MediaType.CBZ -> {
+            MediaType.CBZ, MediaType.DOCUMENT, MediaType.EBOOK, MediaType.PRESENTATION -> {
                 binding.bottomScrubberContainer.visibility = View.VISIBLE
                 binding.tvScrubInfo.visibility = View.VISIBLE
                 binding.bottomSeekBar.progress = 0
@@ -417,9 +421,7 @@ class MediaViewerActivity : AppCompatActivity() {
 
                     holder?.seekTo(fraction)
 
-                    if (currentType == MediaType.CBZ) {
-                        // Handled via onComicProgress
-                    } else {
+                    if (!isPaginatedMediaType(currentType)) {
                         binding.tvScrubInfo.visibility = View.VISIBLE
                     }
                 }
@@ -433,7 +435,7 @@ class MediaViewerActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 isUserScrubbing = false
                 val currentType = mediaList.getOrNull(currentPosition)?.type
-                if (currentType != MediaType.CBZ) {
+                if (!isPaginatedMediaType(currentType)) {
                     handler.postDelayed({
                         if (!isUserScrubbing) {
                             binding.tvScrubInfo.visibility = View.GONE
@@ -446,7 +448,7 @@ class MediaViewerActivity : AppCompatActivity() {
 
     private fun updatePlaybackProgress(posMs: Long, durationMs: Long, fraction: Float) {
         val currentType = mediaList.getOrNull(currentPosition)?.type
-        if (currentType == MediaType.VIDEO || currentType == MediaType.GIF) {
+        if (currentType == MediaType.VIDEO || currentType == MediaType.GIF || currentType == MediaType.AUDIO) {
             binding.bottomSeekBar.progress = (fraction * 1000).toInt()
             val posStr = formatTime(posMs)
             val durStr = formatTime(durationMs)
@@ -481,7 +483,7 @@ class MediaViewerActivity : AppCompatActivity() {
         val holder = adapter.getViewHolderAt(position) ?: return
         val currentType = mediaList.getOrNull(position)?.type
 
-        if (currentType == MediaType.VIDEO || currentType == MediaType.GIF) {
+        if (currentType == MediaType.VIDEO || currentType == MediaType.GIF || currentType == MediaType.AUDIO) {
             val isNowPlaying = holder.togglePlayPause()
             showCenterIndicator(isNowPlaying)
         } else {

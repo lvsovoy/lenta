@@ -6,7 +6,9 @@ import android.media.MediaMetadataRetriever
 import android.os.Build
 import coil.Coil
 import coil.request.ImageRequest
+import me.lesovoy.lenta.data.audio.AudioMetadataHelper
 import me.lesovoy.lenta.data.cbz.CbzReader
+import me.lesovoy.lenta.data.document.DocumentPageReader
 import me.lesovoy.lenta.data.model.MediaItem
 import me.lesovoy.lenta.data.model.MediaType
 import me.lesovoy.lenta.data.nextcloud.NextcloudClient
@@ -91,10 +93,18 @@ object ThumbnailManager {
                     val cachedThumb = File(getVideoThumbnailDir(cacheDir), cacheKey)
                     cachedThumb.exists() && cachedThumb.length() > 0L
                 }
-                MediaType.CBZ -> {
+                MediaType.CBZ, MediaType.DOCUMENT, MediaType.EBOOK, MediaType.PRESENTATION -> {
                     val cacheKey = getCbzCoverCacheKey(item)
                     val thumbCacheDir = getCbzThumbnailDir(cacheDir)
-                    thumbCacheDir.listFiles { _, name -> name.startsWith(cacheKey) }?.any { it.length() > 0 } == true
+                    val foundInCbz = thumbCacheDir.listFiles { _, name -> name.startsWith(cacheKey) }?.any { it.length() > 0 } == true
+                    if (foundInCbz) true else {
+                        val docThumbDir = File(cacheDir, "thumbnail_cache/doc")
+                        docThumbDir.listFiles { _, name -> name.startsWith(cacheKey) }?.any { it.length() > 0 } == true
+                    }
+                }
+                MediaType.AUDIO -> {
+                    val audioThumbDir = File(cacheDir, "thumbnail_cache/audio")
+                    audioThumbDir.listFiles { _, name -> name.contains(item.name.hashCode().toString()) }?.any { it.length() > 0 } == true
                 }
                 MediaType.IMAGE, MediaType.GIF -> {
                     true
@@ -115,6 +125,15 @@ object ThumbnailManager {
                 val cacheKey = getCbzCoverCacheKey(item)
                 val thumbCacheDir = getCbzThumbnailDir(cacheDir)
                 thumbCacheDir.listFiles { _, name -> name.startsWith(cacheKey) }?.any { it.length() > 0 } == true
+            }
+            MediaType.DOCUMENT, MediaType.EBOOK, MediaType.PRESENTATION -> {
+                val cacheKey = "cover_${file.name.hashCode()}_${file.length()}_${file.lastModified()}"
+                val thumbCacheDir = File(cacheDir, "thumbnail_cache/doc")
+                thumbCacheDir.listFiles { _, name -> name.startsWith(cacheKey) }?.any { it.length() > 0 } == true
+            }
+            MediaType.AUDIO -> {
+                val audioThumbDir = File(cacheDir, "thumbnail_cache/audio")
+                audioThumbDir.listFiles { _, name -> name.contains(file.name.hashCode().toString()) }?.any { it.length() > 0 } == true
             }
             MediaType.IMAGE, MediaType.GIF -> {
                 true
@@ -200,6 +219,41 @@ object ThumbnailManager {
                 }
             } catch (_: Throwable) {
             }
+        }
+
+        null
+    }
+
+    suspend fun getDocumentCoverThumbnail(
+        cacheDir: File,
+        item: MediaItem,
+        client: me.lesovoy.lenta.data.source.RemoteFileClient? = null
+    ): File? = withContext(Dispatchers.IO) {
+        if (!item.isRemote) {
+            val file = File(item.path)
+            return@withContext DocumentPageReader.getDocumentCover(cacheDir, file)
+        }
+
+        val cacheKey = "cover_${item.id.hashCode()}_${item.size}_${item.dateModified}"
+        val thumbCacheDir = File(cacheDir, "thumbnail_cache/doc")
+        thumbCacheDir.mkdirs()
+        val existingCover = thumbCacheDir.listFiles { _, name -> name.startsWith(cacheKey) }?.firstOrNull { it.length() > 0L }
+        if (existingCover != null && existingCover.exists()) {
+            return@withContext existingCover
+        }
+
+        val nextcloudCacheDir = File(cacheDir, "nextcloud_cache")
+        val downloadedFile = File(nextcloudCacheDir, "${item.id.hashCode()}_${item.name}")
+        if (downloadedFile.exists() && downloadedFile.length() > 0L) {
+            val cover = DocumentPageReader.getDocumentCover(cacheDir, downloadedFile)
+            if (cover != null && cover.exists()) return@withContext cover
+        }
+
+        val remoteCacheDir = File(cacheDir, "remote_cache/${item.sourceId ?: ""}")
+        val remoteDownloadedFile = File(remoteCacheDir, "${item.id.hashCode()}_${item.name}")
+        if (remoteDownloadedFile.exists() && remoteDownloadedFile.length() > 0L) {
+            val cover = DocumentPageReader.getDocumentCover(cacheDir, remoteDownloadedFile)
+            if (cover != null && cover.exists()) return@withContext cover
         }
 
         null
@@ -545,6 +599,20 @@ object ThumbnailManager {
                             onThumbnailGenerated?.invoke(item, cover)
                         }
                     }
+                    MediaType.DOCUMENT, MediaType.EBOOK, MediaType.PRESENTATION -> {
+                        val cover = DocumentPageReader.getDocumentCover(cacheDir, file)
+                        if (cover != null && cover.exists()) {
+                            processedCount++
+                            onThumbnailGenerated?.invoke(item, cover)
+                        }
+                    }
+                    MediaType.AUDIO -> {
+                        val meta = AudioMetadataHelper.extractMetadata(cacheDir.parentFile ?: cacheDir, file)
+                        if (meta.artworkFile != null && meta.artworkFile.exists()) {
+                            processedCount++
+                            onThumbnailGenerated?.invoke(item, meta.artworkFile)
+                        }
+                    }
                     MediaType.IMAGE, MediaType.GIF -> {
                         processedCount++
                         onThumbnailGenerated?.invoke(item, file)
@@ -630,6 +698,37 @@ object ThumbnailManager {
                                 }
                             }
                         }
+                        MediaType.DOCUMENT, MediaType.EBOOK, MediaType.PRESENTATION -> {
+                            val cover = getDocumentCoverThumbnail(context.cacheDir, item, client)
+                            if (cover != null && cover.exists()) {
+                                if (imageLoader != null) {
+                                    val request = ImageRequest.Builder(context)
+                                        .data(cover)
+                                        .size(512, 512)
+                                        .build()
+                                    imageLoader.execute(request)
+                                }
+                                withContext(Dispatchers.Main) {
+                                    onThumbnailGenerated?.invoke(item)
+                                }
+                            }
+                        }
+                        MediaType.AUDIO -> {
+                            val audioThumbDir = File(context.cacheDir, "thumbnail_cache/audio")
+                            val cachedArt = audioThumbDir.listFiles { _, name -> name.contains(item.name.hashCode().toString()) }?.firstOrNull()
+                            if (cachedArt != null && cachedArt.exists()) {
+                                if (imageLoader != null) {
+                                    val request = ImageRequest.Builder(context)
+                                        .data(cachedArt)
+                                        .size(512, 512)
+                                        .build()
+                                    imageLoader.execute(request)
+                                }
+                                withContext(Dispatchers.Main) {
+                                    onThumbnailGenerated?.invoke(item)
+                                }
+                            }
+                        }
                         MediaType.IMAGE, MediaType.GIF -> {
                             if (imageLoader != null) {
                                 val previewUrl = client.getPreviewUrl(item) ?: item.uriString
@@ -671,6 +770,36 @@ object ThumbnailManager {
                                     if (imageLoader != null) {
                                         val request = ImageRequest.Builder(context)
                                             .data(cover)
+                                            .size(512, 512)
+                                            .build()
+                                        imageLoader.execute(request)
+                                    }
+                                    withContext(Dispatchers.Main) {
+                                        onThumbnailGenerated?.invoke(item)
+                                    }
+                                }
+                            }
+                            MediaType.DOCUMENT, MediaType.EBOOK, MediaType.PRESENTATION -> {
+                                val cover = DocumentPageReader.getDocumentCover(context.cacheDir, file)
+                                if (cover != null && cover.exists()) {
+                                    if (imageLoader != null) {
+                                        val request = ImageRequest.Builder(context)
+                                            .data(cover)
+                                            .size(512, 512)
+                                            .build()
+                                        imageLoader.execute(request)
+                                    }
+                                    withContext(Dispatchers.Main) {
+                                        onThumbnailGenerated?.invoke(item)
+                                    }
+                                }
+                            }
+                            MediaType.AUDIO -> {
+                                val meta = AudioMetadataHelper.extractMetadata(context, file)
+                                if (meta.artworkFile != null && meta.artworkFile.exists()) {
+                                    if (imageLoader != null) {
+                                        val request = ImageRequest.Builder(context)
+                                            .data(meta.artworkFile)
                                             .size(512, 512)
                                             .build()
                                         imageLoader.execute(request)

@@ -85,18 +85,14 @@ class FileListAdapter(
                 binding.tvBadge.visibility = View.VISIBLE
 
                 when (item.type) {
-                    MediaType.IMAGE -> {
-                        binding.tvBadge.text = "IMG"
-                    }
-                    MediaType.VIDEO -> {
-                        binding.tvBadge.text = "VIDEO"
-                    }
-                    MediaType.GIF -> {
-                        binding.tvBadge.text = "GIF"
-                    }
-                    MediaType.CBZ -> {
-                        binding.tvBadge.text = "CBZ"
-                    }
+                    MediaType.IMAGE -> binding.tvBadge.text = "IMG"
+                    MediaType.VIDEO -> binding.tvBadge.text = "VIDEO"
+                    MediaType.GIF -> binding.tvBadge.text = "GIF"
+                    MediaType.CBZ -> binding.tvBadge.text = "CBZ"
+                    MediaType.AUDIO -> binding.tvBadge.text = "AUDIO"
+                    MediaType.DOCUMENT -> binding.tvBadge.text = "DOC"
+                    MediaType.EBOOK -> binding.tvBadge.text = "BOOK"
+                    MediaType.PRESENTATION -> binding.tvBadge.text = "PPT"
                 }
 
                 val sizeStr = formatFileSize(item.size)
@@ -107,6 +103,10 @@ class FileListAdapter(
                     MediaType.VIDEO -> R.drawable.ic_video
                     MediaType.GIF -> R.drawable.ic_gif
                     MediaType.CBZ -> R.drawable.ic_comic
+                    MediaType.AUDIO -> R.drawable.ic_audio
+                    MediaType.DOCUMENT -> R.drawable.ic_document
+                    MediaType.EBOOK -> R.drawable.ic_ebook
+                    MediaType.PRESENTATION -> R.drawable.ic_presentation
                 }
 
                 // Load thumbnail with caching and frame/cover extraction
@@ -136,6 +136,18 @@ class FileListAdapter(
                                     ?.firstOrNull { it.length() > 0L }
                                 cached ?: cachedFile
                             }
+                            MediaType.DOCUMENT, MediaType.EBOOK, MediaType.PRESENTATION -> {
+                                val cacheKey = "cover_${cachedFile.name.hashCode()}_${cachedFile.length()}_${cachedFile.lastModified()}"
+                                val cached = File(context.cacheDir, "thumbnail_cache/doc")
+                                    .listFiles { _, name -> name.startsWith(cacheKey) }
+                                    ?.firstOrNull { it.length() > 0L }
+                                cached ?: defaultIconRes
+                            }
+                            MediaType.AUDIO -> {
+                                val audioThumbDir = File(context.cacheDir, "thumbnail_cache/audio")
+                                val cachedArt = audioThumbDir.listFiles { _, name -> name.contains(cachedFile.name.hashCode().toString()) }?.firstOrNull()
+                                cachedArt ?: defaultIconRes
+                            }
                             else -> cachedFile
                         }
                     } else {
@@ -149,16 +161,24 @@ class FileListAdapter(
                                     client.getPreviewUrl(item) ?: item.uriString
                                 }
                             }
-                            MediaType.CBZ -> {
+                            MediaType.CBZ, MediaType.DOCUMENT, MediaType.EBOOK, MediaType.PRESENTATION -> {
                                 val remCacheKey = ThumbnailManager.getCbzCoverCacheKey(item)
                                 val cached = ThumbnailManager.getCbzThumbnailDir(context.cacheDir)
                                     .listFiles { _, name -> name.startsWith(remCacheKey) }
                                     ?.firstOrNull { it.length() > 0L }
+                                    ?: File(context.cacheDir, "thumbnail_cache/doc")
+                                        .listFiles { _, name -> name.startsWith(remCacheKey) }
+                                        ?.firstOrNull { it.length() > 0L }
                                 if (cached != null) {
                                     cached
                                 } else {
                                     client.getPreviewUrl(item) ?: defaultIconRes
                                 }
+                            }
+                            MediaType.AUDIO -> {
+                                val audioThumbDir = File(context.cacheDir, "thumbnail_cache/audio")
+                                val cachedArt = audioThumbDir.listFiles { _, name -> name.contains(item.name.hashCode().toString()) }?.firstOrNull()
+                                cachedArt ?: client.getPreviewUrl(item) ?: defaultIconRes
                             }
                             MediaType.IMAGE, MediaType.GIF -> {
                                 client.getPreviewUrl(item) ?: item.uriString
@@ -188,6 +208,18 @@ class FileListAdapter(
                                 .listFiles { _, name -> name.startsWith(cacheKey) }
                                 ?.firstOrNull { it.length() > 0L }
                             cached ?: file
+                        }
+                        MediaType.DOCUMENT, MediaType.EBOOK, MediaType.PRESENTATION -> {
+                            val cacheKey = "cover_${file.name.hashCode()}_${file.length()}_${file.lastModified()}"
+                            val cached = File(context.cacheDir, "thumbnail_cache/doc")
+                                .listFiles { _, name -> name.startsWith(cacheKey) }
+                                ?.firstOrNull { it.length() > 0L }
+                            cached ?: defaultIconRes
+                        }
+                        MediaType.AUDIO -> {
+                            val audioThumbDir = File(context.cacheDir, "thumbnail_cache/audio")
+                            val cachedArt = audioThumbDir.listFiles { _, name -> name.contains(file.name.hashCode().toString()) }?.firstOrNull()
+                            cachedArt ?: defaultIconRes
                         }
                         else -> file
                     }

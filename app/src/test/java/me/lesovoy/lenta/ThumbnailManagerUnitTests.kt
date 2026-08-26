@@ -334,7 +334,7 @@ class ThumbnailManagerUnitTests {
 
             val mediaSubdir = File(tempDir, "CameraRoll")
             mediaSubdir.mkdirs()
-            File(mediaSubdir, "text_file.txt").writeText("hello")
+            File(mediaSubdir, "binary_file.dat").writeText("hello")
             assertNull(LocalMediaRepository.getFirstMediaFileInDirectory(mediaSubdir))
 
             val photo = File(mediaSubdir, "photo_01.jpg")

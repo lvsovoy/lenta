@@ -7,7 +7,11 @@ enum class MediaType {
     IMAGE,
     VIDEO,
     GIF,
-    CBZ
+    CBZ,
+    AUDIO,
+    DOCUMENT,
+    EBOOK,
+    PRESENTATION
 }
 
 data class MediaItem(

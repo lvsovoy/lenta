@@ -83,6 +83,10 @@ class DrawerFileListAdapter(
                     MediaType.VIDEO -> binding.tvDrawerBadge.text = "VID"
                     MediaType.GIF -> binding.tvDrawerBadge.text = "GIF"
                     MediaType.CBZ -> binding.tvDrawerBadge.text = "CBZ"
+                    MediaType.AUDIO -> binding.tvDrawerBadge.text = "AUD"
+                    MediaType.DOCUMENT -> binding.tvDrawerBadge.text = "DOC"
+                    MediaType.EBOOK -> binding.tvDrawerBadge.text = "BOOK"
+                    MediaType.PRESENTATION -> binding.tvDrawerBadge.text = "PPT"
                 }
 
                 val defaultIconRes = when (item.type) {
@@ -90,6 +94,10 @@ class DrawerFileListAdapter(
                     MediaType.VIDEO -> R.drawable.ic_video
                     MediaType.GIF -> R.drawable.ic_gif
                     MediaType.CBZ -> R.drawable.ic_comic
+                    MediaType.AUDIO -> R.drawable.ic_audio
+                    MediaType.DOCUMENT -> R.drawable.ic_document
+                    MediaType.EBOOK -> R.drawable.ic_ebook
+                    MediaType.PRESENTATION -> R.drawable.ic_presentation
                 }
 
                 val context = binding.root.context
@@ -118,6 +126,18 @@ class DrawerFileListAdapter(
                                     ?.firstOrNull { it.length() > 0L }
                                 cached ?: cachedFile
                             }
+                            MediaType.DOCUMENT, MediaType.EBOOK, MediaType.PRESENTATION -> {
+                                val cacheKey = "cover_${cachedFile.name.hashCode()}_${cachedFile.length()}_${cachedFile.lastModified()}"
+                                val cached = File(context.cacheDir, "thumbnail_cache/doc")
+                                    .listFiles { _, name -> name.startsWith(cacheKey) }
+                                    ?.firstOrNull { it.length() > 0L }
+                                cached ?: defaultIconRes
+                            }
+                            MediaType.AUDIO -> {
+                                val audioThumbDir = File(context.cacheDir, "thumbnail_cache/audio")
+                                val cachedArt = audioThumbDir.listFiles { _, name -> name.contains(cachedFile.name.hashCode().toString()) }?.firstOrNull()
+                                cachedArt ?: defaultIconRes
+                            }
                             else -> cachedFile
                         }
                     } else {
@@ -131,16 +151,24 @@ class DrawerFileListAdapter(
                                     client.getPreviewUrl(item) ?: item.uriString
                                 }
                             }
-                            MediaType.CBZ -> {
+                            MediaType.CBZ, MediaType.DOCUMENT, MediaType.EBOOK, MediaType.PRESENTATION -> {
                                 val remCacheKey = ThumbnailManager.getCbzCoverCacheKey(item)
                                 val cached = ThumbnailManager.getCbzThumbnailDir(context.cacheDir)
                                     .listFiles { _, name -> name.startsWith(remCacheKey) }
                                     ?.firstOrNull { it.length() > 0L }
+                                    ?: File(context.cacheDir, "thumbnail_cache/doc")
+                                        .listFiles { _, name -> name.startsWith(remCacheKey) }
+                                        ?.firstOrNull { it.length() > 0L }
                                 if (cached != null && cached.length() > 0L) {
                                     cached
                                 } else {
-                                    client.getPreviewUrl(item) ?: item.uriString
+                                    client.getPreviewUrl(item) ?: defaultIconRes
                                 }
+                            }
+                            MediaType.AUDIO -> {
+                                val audioThumbDir = File(context.cacheDir, "thumbnail_cache/audio")
+                                val cachedArt = audioThumbDir.listFiles { _, name -> name.contains(item.name.hashCode().toString()) }?.firstOrNull()
+                                cachedArt ?: client.getPreviewUrl(item) ?: defaultIconRes
                             }
                             MediaType.IMAGE, MediaType.GIF -> {
                                 client.getPreviewUrl(item) ?: item.uriString
@@ -175,6 +203,18 @@ class DrawerFileListAdapter(
                                     .listFiles { _, name -> name.startsWith(cacheKey) }
                                     ?.firstOrNull { it.length() > 0L }
                                 cached ?: file
+                            }
+                            MediaType.DOCUMENT, MediaType.EBOOK, MediaType.PRESENTATION -> {
+                                val cacheKey = "cover_${file.name.hashCode()}_${file.length()}_${file.lastModified()}"
+                                val cached = File(context.cacheDir, "thumbnail_cache/doc")
+                                    .listFiles { _, name -> name.startsWith(cacheKey) }
+                                    ?.firstOrNull { it.length() > 0L }
+                                cached ?: defaultIconRes
+                            }
+                            MediaType.AUDIO -> {
+                                val audioThumbDir = File(context.cacheDir, "thumbnail_cache/audio")
+                                val cachedArt = audioThumbDir.listFiles { _, name -> name.contains(file.name.hashCode().toString()) }?.firstOrNull()
+                                cachedArt ?: defaultIconRes
                             }
                             else -> file
                         }

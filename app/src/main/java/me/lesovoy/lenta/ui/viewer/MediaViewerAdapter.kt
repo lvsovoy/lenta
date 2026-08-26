@@ -14,11 +14,16 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import coil.load
+import me.lesovoy.lenta.R
+import me.lesovoy.lenta.data.audio.AudioMetadata
+import me.lesovoy.lenta.data.audio.AudioMetadataHelper
 import me.lesovoy.lenta.data.cbz.CbzReader
+import me.lesovoy.lenta.data.document.DocumentPageReader
 import me.lesovoy.lenta.data.model.MediaItem
 import me.lesovoy.lenta.data.model.MediaType
 import me.lesovoy.lenta.data.nextcloud.NextcloudClient
 import me.lesovoy.lenta.data.nextcloud.NextcloudPreferences
+import me.lesovoy.lenta.databinding.ItemMediaAudioBinding
 import me.lesovoy.lenta.databinding.ItemMediaCbzBinding
 import me.lesovoy.lenta.databinding.ItemMediaGifBinding
 import me.lesovoy.lenta.databinding.ItemMediaImageBinding
@@ -47,6 +52,17 @@ class MediaViewerAdapter(
         private const val TYPE_VIDEO = 1
         private const val TYPE_GIF = 2
         private const val TYPE_CBZ = 3
+        private const val TYPE_AUDIO = 4
+        private const val TYPE_DOCUMENT = 5
+        private const val TYPE_EBOOK = 6
+        private const val TYPE_PRESENTATION = 7
+
+        fun formatTime(ms: Long): String {
+            val totalSeconds = (ms / 1000).coerceAtLeast(0)
+            val minutes = totalSeconds / 60
+            val seconds = totalSeconds % 60
+            return String.format("%02d:%02d", minutes, seconds)
+        }
     }
 
     private var currentMuted = preferences.muteByDefault
@@ -83,6 +99,10 @@ class MediaViewerAdapter(
             MediaType.VIDEO -> TYPE_VIDEO
             MediaType.GIF -> TYPE_GIF
             MediaType.CBZ -> TYPE_CBZ
+            MediaType.AUDIO -> TYPE_AUDIO
+            MediaType.DOCUMENT -> TYPE_DOCUMENT
+            MediaType.EBOOK -> TYPE_EBOOK
+            MediaType.PRESENTATION -> TYPE_PRESENTATION
         }
     }
 
@@ -92,7 +112,8 @@ class MediaViewerAdapter(
             TYPE_IMAGE -> ImageViewHolder(ItemMediaImageBinding.inflate(inflater, parent, false))
             TYPE_VIDEO -> VideoViewHolder(ItemMediaVideoBinding.inflate(inflater, parent, false))
             TYPE_GIF -> GifViewHolder(ItemMediaGifBinding.inflate(inflater, parent, false))
-            TYPE_CBZ -> CbzViewHolder(ItemMediaCbzBinding.inflate(inflater, parent, false))
+            TYPE_CBZ, TYPE_DOCUMENT, TYPE_EBOOK, TYPE_PRESENTATION -> CbzViewHolder(ItemMediaCbzBinding.inflate(inflater, parent, false))
+            TYPE_AUDIO -> AudioViewHolder(ItemMediaAudioBinding.inflate(inflater, parent, false))
             else -> ImageViewHolder(ItemMediaImageBinding.inflate(inflater, parent, false))
         }
     }
@@ -663,16 +684,16 @@ class MediaViewerAdapter(
                             nextcloudClient
                         }
                         val cached = client.downloadToCache(binding.root.context, item)
-                        val comicFile = if (cached.isSuccess) cached.getOrThrow() else File(item.path)
-                        CbzReader.getComicPages(binding.root.context, comicFile)
+                        val docFile = if (cached.isSuccess) cached.getOrThrow() else File(item.path)
+                        DocumentPageReader.getDocumentPages(binding.root.context, docFile)
                     } else if (item.uriString.startsWith("content://")) {
-                        CbzReader.getComicPagesFromUri(binding.root.context, Uri.parse(item.uriString), item.id)
+                        DocumentPageReader.getDocumentPagesFromUri(binding.root.context, Uri.parse(item.uriString), item.id, item.name, item.mimeType)
                     } else {
-                        val comicFile = File(item.path)
-                        if (comicFile.exists()) {
-                            CbzReader.getComicPages(binding.root.context, comicFile)
+                        val docFile = File(item.path)
+                        if (docFile.exists()) {
+                            DocumentPageReader.getDocumentPages(binding.root.context, docFile)
                         } else if (item.uriString.isNotEmpty()) {
-                            CbzReader.getComicPagesFromUri(binding.root.context, Uri.parse(item.uriString), item.id)
+                            DocumentPageReader.getDocumentPagesFromUri(binding.root.context, Uri.parse(item.uriString), item.id, item.name, item.mimeType)
                         } else {
                             emptyList()
                         }
@@ -785,6 +806,300 @@ class MediaViewerAdapter(
             isActive = false
             job?.cancel()
             binding.cbzViewPager.adapter = null
+        }
+    }
+
+    // ==========================================
+    // AUDIO VIEWHOLDER
+    // ==========================================
+    inner class AudioViewHolder(val binding: ItemMediaAudioBinding) : BaseMediaViewHolder(binding.root) {
+        private var exoPlayer: ExoPlayer? = null
+        private var progressJob: Job? = null
+        private var metadataJob: Job? = null
+        private var isPlayerReady = false
+        private var isPaused = false
+
+        override fun bind(item: MediaItem, position: Int) {
+            isActive = (position == activePosition)
+            binding.progressLoading.visibility = View.VISIBLE
+            binding.waveformView.setWaveformSeed(item.name)
+            binding.tvAudioTitle.text = item.name.substringBeforeLast('.')
+            binding.tvAudioArtistAlbum.text = "Loading audio..."
+            binding.ivAlbumArt.setImageResource(R.drawable.ic_audio)
+            binding.tvTimeCurrent.text = "00:00"
+            binding.tvTimeTotal.text = "00:00"
+
+            binding.btnAudioPlayPause.setImageResource(R.drawable.ic_play_arrow)
+            binding.btnAudioPlayPause.setOnClickListener {
+                togglePlayPause()
+            }
+            binding.btnAudioReplay5.setOnClickListener {
+                skipBy(-5000L)
+            }
+            binding.btnAudioForward5.setOnClickListener {
+                skipBy(5000L)
+            }
+            binding.waveformView.onSeekListener = { fraction ->
+                seekTo(fraction)
+            }
+
+            binding.root.setOnClickListener {
+                onItemTapped(bindingAdapterPosition)
+            }
+
+            // Extract metadata and artwork
+            metadataJob?.cancel()
+            metadataJob = scope.launch {
+                val metadata = withContext(Dispatchers.IO) {
+                    if (item.isRemote) {
+                        val client = if (item.sourceId != null) {
+                            me.lesovoy.lenta.data.source.SourceClientFactory.getClientForSourceId(binding.root.context, item.sourceId) ?: nextcloudClient
+                        } else {
+                            nextcloudClient
+                        }
+                        val cached = client.downloadToCache(binding.root.context, item)
+                        if (cached.isSuccess) {
+                            AudioMetadataHelper.extractMetadata(binding.root.context, cached.getOrThrow())
+                        } else {
+                            AudioMetadata(
+                                title = item.name.substringBeforeLast('.'),
+                                artist = "Audio Track",
+                                album = item.sourceType?.name ?: "Cloud",
+                                durationMs = 0L,
+                                artworkFile = null
+                            )
+                        }
+                    } else if (item.uriString.startsWith("content://")) {
+                        AudioMetadataHelper.extractMetadataFromUri(binding.root.context, Uri.parse(item.uriString), item.name)
+                    } else {
+                        val file = File(item.path)
+                        if (file.exists()) {
+                            AudioMetadataHelper.extractMetadata(binding.root.context, file)
+                        } else {
+                            AudioMetadata(
+                                title = item.name.substringBeforeLast('.'),
+                                artist = "Audio Track",
+                                album = "Local",
+                                durationMs = 0L,
+                                artworkFile = null
+                            )
+                        }
+                    }
+                }
+
+                withContext(Dispatchers.Main) {
+                    binding.tvAudioTitle.text = metadata.title
+                    val artistAlbum = if (metadata.artist.isNotEmpty() && metadata.album.isNotEmpty()) {
+                        "${metadata.artist} • ${metadata.album}"
+                    } else {
+                        metadata.artist.ifEmpty { metadata.album }.ifEmpty { "Audio Track" }
+                    }
+                    binding.tvAudioArtistAlbum.text = artistAlbum
+
+                    if (metadata.artworkFile != null && metadata.artworkFile.exists()) {
+                        binding.ivAlbumArt.load(metadata.artworkFile) {
+                            crossfade(true)
+                            error(R.drawable.ic_audio)
+                        }
+                    } else {
+                        binding.ivAlbumArt.setImageResource(R.drawable.ic_audio)
+                    }
+
+                    if (metadata.durationMs > 0L) {
+                        binding.tvTimeTotal.text = formatTime(metadata.durationMs)
+                    }
+                }
+            }
+
+            // Setup ExoPlayer
+            setupPlayer(item)
+        }
+
+        private fun setupPlayer(item: MediaItem) {
+            cleanupPlayer()
+            val context = binding.root.context
+            val player = ExoPlayer.Builder(context).build()
+            exoPlayer = player
+
+            val exoMediaItem = when {
+                item.isRemote -> {
+                    val client = if (item.sourceId != null) {
+                        me.lesovoy.lenta.data.source.SourceClientFactory.getClientForSourceId(context, item.sourceId) ?: nextcloudClient
+                    } else {
+                        nextcloudClient
+                    }
+                    val streamUrl = client.getStreamUrl(item)
+                    val cacheSubdir = File(context.cacheDir, if (item.isNextcloud) "nextcloud_cache" else "remote_cache/${item.sourceId ?: ""}")
+                    val safeFileName = "${item.id.hashCode()}_${item.name}"
+                    val cachedFile = File(cacheSubdir, safeFileName)
+                    if (cachedFile.exists() && cachedFile.length() > 0L) {
+                        ExoMediaItem.fromUri(Uri.fromFile(cachedFile))
+                    } else {
+                        ExoMediaItem.fromUri(Uri.parse(streamUrl))
+                    }
+                }
+                item.uriString.startsWith("content://") -> {
+                    ExoMediaItem.fromUri(Uri.parse(item.uriString))
+                }
+                else -> {
+                    val file = File(item.path)
+                    if (file.exists()) {
+                        ExoMediaItem.fromUri(Uri.fromFile(file))
+                    } else {
+                        ExoMediaItem.fromUri(Uri.parse(item.uriString))
+                    }
+                }
+            }
+
+            player.setMediaItem(exoMediaItem)
+            player.volume = if (currentMuted) 0f else 1f
+            player.prepare()
+
+            player.addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(state: Int) {
+                    when (state) {
+                        Player.STATE_READY -> {
+                            isPlayerReady = true
+                            binding.progressLoading.visibility = View.GONE
+                            val dur = player.duration.coerceAtLeast(0L)
+                            binding.tvTimeTotal.text = formatTime(dur)
+                            if (isActive && !isPaused) {
+                                player.play()
+                            }
+                        }
+                        Player.STATE_ENDED -> {
+                            player.seekTo(0)
+                            player.pause()
+                            binding.btnAudioPlayPause.setImageResource(R.drawable.ic_play_arrow)
+                            binding.waveformView.setPlaying(false)
+                        }
+                        Player.STATE_BUFFERING -> {
+                            binding.progressLoading.visibility = View.VISIBLE
+                        }
+                        Player.STATE_IDLE -> {}
+                    }
+                }
+
+                override fun onIsPlayingChanged(isPlayingNow: Boolean) {
+                    binding.btnAudioPlayPause.setImageResource(
+                        if (isPlayingNow) R.drawable.ic_pause else R.drawable.ic_play_arrow
+                    )
+                    binding.waveformView.setPlaying(isPlayingNow)
+                    if (isPlayingNow) {
+                        startProgressUpdates()
+                    } else {
+                        progressJob?.cancel()
+                    }
+                }
+
+                override fun onPlayerError(error: PlaybackException) {
+                    binding.progressLoading.visibility = View.GONE
+                }
+            })
+        }
+
+        private fun startProgressUpdates() {
+            progressJob?.cancel()
+            progressJob = scope.launch {
+                while (isActive && exoPlayer?.isPlaying == true) {
+                    val player = exoPlayer ?: break
+                    val currentMs = player.currentPosition.coerceAtLeast(0L)
+                    val durationMs = player.duration.coerceAtLeast(1L)
+                    val fraction = (currentMs.toFloat() / durationMs.toFloat()).coerceIn(0f, 1f)
+
+                    binding.waveformView.setProgress(fraction)
+                    binding.tvTimeCurrent.text = formatTime(currentMs)
+                    binding.tvTimeTotal.text = formatTime(durationMs)
+
+                    val pos = bindingAdapterPosition
+                    if (pos != RecyclerView.NO_POSITION) {
+                        onPlaybackProgress(pos, currentMs, durationMs, fraction, true)
+                    }
+                    kotlinx.coroutines.delay(100)
+                }
+            }
+        }
+
+        override fun onActive() {
+            isActive = true
+            if (!isPaused && isPlayerReady) {
+                exoPlayer?.play()
+            }
+            startProgressUpdates()
+        }
+
+        override fun onInactive() {
+            isActive = false
+            progressJob?.cancel()
+            exoPlayer?.pause()
+            binding.waveformView.setPlaying(false)
+        }
+
+        override fun togglePlayPause(): Boolean {
+            val player = exoPlayer ?: return false
+            return if (player.isPlaying) {
+                player.pause()
+                isPaused = true
+                binding.btnAudioPlayPause.setImageResource(R.drawable.ic_play_arrow)
+                binding.waveformView.setPlaying(false)
+                false
+            } else {
+                player.play()
+                isPaused = false
+                binding.btnAudioPlayPause.setImageResource(R.drawable.ic_pause)
+                binding.waveformView.setPlaying(true)
+                true
+            }
+        }
+
+        override fun isPlaying(): Boolean = exoPlayer?.isPlaying == true
+
+        override fun seekTo(fraction: Float) {
+            val player = exoPlayer ?: return
+            val durationMs = player.duration.coerceAtLeast(0L)
+            val targetMs = (fraction * durationMs).toLong().coerceIn(0L, durationMs)
+            player.seekTo(targetMs)
+            binding.waveformView.setProgress(fraction)
+            binding.tvTimeCurrent.text = formatTime(targetMs)
+            val pos = bindingAdapterPosition
+            if (pos != RecyclerView.NO_POSITION) {
+                onPlaybackProgress(pos, targetMs, durationMs, fraction, player.isPlaying)
+            }
+        }
+
+        override fun skipBy(offsetMs: Long): Long {
+            val player = exoPlayer ?: return 0L
+            val currentMs = player.currentPosition
+            val durationMs = player.duration.coerceAtLeast(0L)
+            val targetMs = (currentMs + offsetMs).coerceIn(0L, durationMs)
+            player.seekTo(targetMs)
+            val fraction = if (durationMs > 0) (targetMs.toFloat() / durationMs.toFloat()).coerceIn(0f, 1f) else 0f
+            binding.waveformView.setProgress(fraction)
+            binding.tvTimeCurrent.text = formatTime(targetMs)
+            val pos = bindingAdapterPosition
+            if (pos != RecyclerView.NO_POSITION) {
+                onPlaybackProgress(pos, targetMs, durationMs, fraction, player.isPlaying)
+                onVideoSkipped(pos, offsetMs > 0)
+            }
+            return targetMs
+        }
+
+        override fun setMuted(muted: Boolean) {
+            exoPlayer?.volume = if (muted) 0f else 1f
+        }
+
+        private fun cleanupPlayer() {
+            progressJob?.cancel()
+            metadataJob?.cancel()
+            exoPlayer?.stop()
+            exoPlayer?.release()
+            exoPlayer = null
+            isPlayerReady = false
+        }
+
+        override fun cleanup() {
+            isActive = false
+            cleanupPlayer()
         }
     }
 }

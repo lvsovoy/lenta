@@ -105,6 +105,93 @@
                 <data android:mimeType="video/*" />
             </intent-filter>
 
+            <!-- Audio -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:mimeType="audio/*" />
+                <data android:mimeType="application/ogg" />
+                <data android:mimeType="application/x-ogg" />
+                <data android:mimeType="application/opus" />
+                <data android:mimeType="application/x-flac" />
+            </intent-filter>
+
+            <!-- Documents (PDF, Office, OpenDocument, RTF, Sheets, etc.) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:mimeType="application/pdf" />
+                <data android:mimeType="application/msword" />
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.template" />
+                <data android:mimeType="application/vnd.ms-word.document.macroEnabled.12" />
+                <data android:mimeType="application/vnd.ms-word.template.macroEnabled.12" />
+                <data android:mimeType="application/vnd.oasis.opendocument.text" />
+                <data android:mimeType="application/vnd.oasis.opendocument.text-template" />
+                <data android:mimeType="application/rtf" />
+                <data android:mimeType="text/rtf" />
+                <data android:mimeType="application/vnd.ms-excel" />
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.template" />
+                <data android:mimeType="application/vnd.oasis.opendocument.spreadsheet" />
+                <data android:mimeType="application/vnd.oasis.opendocument.spreadsheet-template" />
+                <data android:mimeType="text/csv" />
+                <data android:mimeType="text/tab-separated-values" />
+                <data android:mimeType="application/x-iwork-pages-sffpages" />
+                <data android:mimeType="application/vnd.apple.pages" />
+                <data android:mimeType="application/oxps" />
+                <data android:mimeType="application/vnd.ms-xpsdocument" />
+                <data android:mimeType="application/vnd.google-apps.document" />
+                <data android:mimeType="application/vnd.google-apps.spreadsheet" />
+            </intent-filter>
+
+            <!-- Presentations (PowerPoint, OpenDocument Presentation, Keynote) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:mimeType="application/vnd.ms-powerpoint" />
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.presentationml.presentation" />
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.presentationml.slideshow" />
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.presentationml.template" />
+                <data android:mimeType="application/vnd.ms-powerpoint.presentation.macroEnabled.12" />
+                <data android:mimeType="application/vnd.oasis.opendocument.presentation" />
+                <data android:mimeType="application/vnd.oasis.opendocument.presentation-template" />
+                <data android:mimeType="application/vnd.apple.keynote" />
+                <data android:mimeType="application/x-iwork-keynote-sffkey" />
+                <data android:mimeType="application/vnd.google-apps.presentation" />
+            </intent-filter>
+
+            <!-- Ebooks & Plain Text (EPUB, FB2, MOBI, TXT, MD, DJVU, CHM) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:mimeType="application/epub+zip" />
+                <data android:mimeType="application/x-fictionbook+xml" />
+                <data android:mimeType="application/x-fictionbook" />
+                <data android:mimeType="application/x-mobipocket-ebook" />
+                <data android:mimeType="application/vnd.amazon.ebook" />
+                <data android:mimeType="application/vnd.amazon.mobi8-ebook" />
+                <data android:mimeType="text/plain" />
+                <data android:mimeType="text/markdown" />
+                <data android:mimeType="text/x-markdown" />
+                <data android:mimeType="image/vnd.djvu" />
+                <data android:mimeType="image/x-djvu" />
+                <data android:mimeType="application/vnd.ms-htmlhelp" />
+                <data android:mimeType="application/x-chm" />
+            </intent-filter>
+
             <!-- Comic book archives & Zip archives (MIME types) -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -120,6 +207,12 @@
                 <data android:mimeType="application/x-cbt" />
                 <data android:mimeType="application/zip" />
                 <data android:mimeType="application/x-zip-compressed" />
+                <data android:mimeType="application/x-rar-compressed" />
+                <data android:mimeType="application/vnd.rar" />
+                <data android:mimeType="application/x-7z-compressed" />
+                <data android:mimeType="application/x-tar" />
+                <data android:mimeType="application/gzip" />
+                <data android:mimeType="application/x-gzip" />
                 <data android:mimeType="application/octet-stream" />
             </intent-filter>
 
@@ -132,27 +225,105 @@
                 <data android:scheme="file" />
                 <data android:mimeType="*/*" />
                 <data android:host="*" />
+                <!-- Comics & Archives -->
                 <data android:pathPattern=".*\\.cbz" />
                 <data android:pathPattern=".*\\.cbr" />
                 <data android:pathPattern=".*\\.zip" />
                 <data android:pathPattern=".*\\.cb7" />
                 <data android:pathPattern=".*\\.cbt" />
+                <data android:pathPattern=".*\\.cba" />
+                <data android:pathPattern=".*\\.rar" />
+                <data android:pathPattern=".*\\.7z" />
+                <data android:pathPattern=".*\\.tar" />
+                <data android:pathPattern=".*\\.gz" />
+                <!-- Images -->
                 <data android:pathPattern=".*\\.jpg" />
                 <data android:pathPattern=".*\\.jpeg" />
                 <data android:pathPattern=".*\\.png" />
                 <data android:pathPattern=".*\\.webp" />
                 <data android:pathPattern=".*\\.gif" />
+                <data android:pathPattern=".*\\.bmp" />
+                <data android:pathPattern=".*\\.svg" />
+                <data android:pathPattern=".*\\.heic" />
+                <data android:pathPattern=".*\\.heif" />
+                <data android:pathPattern=".*\\.avif" />
+                <!-- Videos -->
                 <data android:pathPattern=".*\\.mp4" />
                 <data android:pathPattern=".*\\.mkv" />
                 <data android:pathPattern=".*\\.webm" />
                 <data android:pathPattern=".*\\.avi" />
                 <data android:pathPattern=".*\\.mov" />
-                <data android:pathPattern=".*\\.heic" />
-                <data android:pathPattern=".*\\.heif" />
-                <data android:pathPattern=".*\\.avif" />
+                <data android:pathPattern=".*\\.3gp" />
+                <data android:pathPattern=".*\\.ts" />
+                <data android:pathPattern=".*\\.m4v" />
+                <data android:pathPattern=".*\\.flv" />
+                <data android:pathPattern=".*\\.wmv" />
+                <!-- Audio -->
+                <data android:pathPattern=".*\\.mp3" />
+                <data android:pathPattern=".*\\.wav" />
+                <data android:pathPattern=".*\\.ogg" />
+                <data android:pathPattern=".*\\.oga" />
+                <data android:pathPattern=".*\\.flac" />
+                <data android:pathPattern=".*\\.m4a" />
+                <data android:pathPattern=".*\\.aac" />
+                <data android:pathPattern=".*\\.opus" />
+                <data android:pathPattern=".*\\.wma" />
+                <data android:pathPattern=".*\\.aiff" />
+                <data android:pathPattern=".*\\.mid" />
+                <data android:pathPattern=".*\\.midi" />
+                <data android:pathPattern=".*\\.amr" />
+                <data android:pathPattern=".*\\.alac" />
+                <data android:pathPattern=".*\\.ape" />
+                <!-- Documents -->
+                <data android:pathPattern=".*\\.pdf" />
+                <data android:pathPattern=".*\\.doc" />
+                <data android:pathPattern=".*\\.docx" />
+                <data android:pathPattern=".*\\.dot" />
+                <data android:pathPattern=".*\\.dotx" />
+                <data android:pathPattern=".*\\.odt" />
+                <data android:pathPattern=".*\\.ott" />
+                <data android:pathPattern=".*\\.rtf" />
+                <data android:pathPattern=".*\\.pages" />
+                <data android:pathPattern=".*\\.gdoc" />
+                <data android:pathPattern=".*\\.xls" />
+                <data android:pathPattern=".*\\.xlsx" />
+                <data android:pathPattern=".*\\.ods" />
+                <data android:pathPattern=".*\\.csv" />
+                <data android:pathPattern=".*\\.tsv" />
+                <data android:pathPattern=".*\\.gsheet" />
+                <data android:pathPattern=".*\\.xps" />
+                <data android:pathPattern=".*\\.oxps" />
+                <!-- Presentations -->
+                <data android:pathPattern=".*\\.ppt" />
+                <data android:pathPattern=".*\\.pptx" />
+                <data android:pathPattern=".*\\.pps" />
+                <data android:pathPattern=".*\\.ppsx" />
+                <data android:pathPattern=".*\\.pot" />
+                <data android:pathPattern=".*\\.potx" />
+                <data android:pathPattern=".*\\.odp" />
+                <data android:pathPattern=".*\\.key" />
+                <data android:pathPattern=".*\\.keynote" />
+                <data android:pathPattern=".*\\.gslides" />
+                <!-- Ebooks & Plain text -->
+                <data android:pathPattern=".*\\.epub" />
+                <data android:pathPattern=".*\\.fb2" />
+                <data android:pathPattern=".*\\.txt" />
+                <data android:pathPattern=".*\\.text" />
+                <data android:pathPattern=".*\\.log" />
+                <data android:pathPattern=".*\\.md" />
+                <data android:pathPattern=".*\\.markdown" />
+                <data android:pathPattern=".*\\.mobi" />
+                <data android:pathPattern=".*\\.azw" />
+                <data android:pathPattern=".*\\.azw3" />
+                <data android:pathPattern=".*\\.djvu" />
+                <data android:pathPattern=".*\\.djv" />
+                <data android:pathPattern=".*\\.chm" />
+                <!-- Uppercase common variants -->
                 <data android:pathPattern=".*\\.CBZ" />
                 <data android:pathPattern=".*\\.CBR" />
                 <data android:pathPattern=".*\\.ZIP" />
+                <data android:pathPattern=".*\\.RAR" />
+                <data android:pathPattern=".*\\.7Z" />
                 <data android:pathPattern=".*\\.JPG" />
                 <data android:pathPattern=".*\\.JPEG" />
                 <data android:pathPattern=".*\\.PNG" />
@@ -160,6 +331,22 @@
                 <data android:pathPattern=".*\\.GIF" />
                 <data android:pathPattern=".*\\.MP4" />
                 <data android:pathPattern=".*\\.MKV" />
+                <data android:pathPattern=".*\\.MP3" />
+                <data android:pathPattern=".*\\.WAV" />
+                <data android:pathPattern=".*\\.FLAC" />
+                <data android:pathPattern=".*\\.M4A" />
+                <data android:pathPattern=".*\\.PDF" />
+                <data android:pathPattern=".*\\.DOC" />
+                <data android:pathPattern=".*\\.DOCX" />
+                <data android:pathPattern=".*\\.XLS" />
+                <data android:pathPattern=".*\\.XLSX" />
+                <data android:pathPattern=".*\\.PPT" />
+                <data android:pathPattern=".*\\.PPTX" />
+                <data android:pathPattern=".*\\.EPUB" />
+                <data android:pathPattern=".*\\.FB2" />
+                <data android:pathPattern=".*\\.TXT" />
+                <data android:pathPattern=".*\\.MD" />
+                <data android:pathPattern=".*\\.MOBI" />
             </intent-filter>
 
             <!-- File / Content schemes without explicit MIME type (by extension) -->
@@ -170,27 +357,105 @@
                 <data android:scheme="content" />
                 <data android:scheme="file" />
                 <data android:host="*" />
+                <!-- Comics & Archives -->
                 <data android:pathPattern=".*\\.cbz" />
                 <data android:pathPattern=".*\\.cbr" />
                 <data android:pathPattern=".*\\.zip" />
                 <data android:pathPattern=".*\\.cb7" />
                 <data android:pathPattern=".*\\.cbt" />
+                <data android:pathPattern=".*\\.cba" />
+                <data android:pathPattern=".*\\.rar" />
+                <data android:pathPattern=".*\\.7z" />
+                <data android:pathPattern=".*\\.tar" />
+                <data android:pathPattern=".*\\.gz" />
+                <!-- Images -->
                 <data android:pathPattern=".*\\.jpg" />
                 <data android:pathPattern=".*\\.jpeg" />
                 <data android:pathPattern=".*\\.png" />
                 <data android:pathPattern=".*\\.webp" />
                 <data android:pathPattern=".*\\.gif" />
+                <data android:pathPattern=".*\\.bmp" />
+                <data android:pathPattern=".*\\.svg" />
+                <data android:pathPattern=".*\\.heic" />
+                <data android:pathPattern=".*\\.heif" />
+                <data android:pathPattern=".*\\.avif" />
+                <!-- Videos -->
                 <data android:pathPattern=".*\\.mp4" />
                 <data android:pathPattern=".*\\.mkv" />
                 <data android:pathPattern=".*\\.webm" />
                 <data android:pathPattern=".*\\.avi" />
                 <data android:pathPattern=".*\\.mov" />
-                <data android:pathPattern=".*\\.heic" />
-                <data android:pathPattern=".*\\.heif" />
-                <data android:pathPattern=".*\\.avif" />
+                <data android:pathPattern=".*\\.3gp" />
+                <data android:pathPattern=".*\\.ts" />
+                <data android:pathPattern=".*\\.m4v" />
+                <data android:pathPattern=".*\\.flv" />
+                <data android:pathPattern=".*\\.wmv" />
+                <!-- Audio -->
+                <data android:pathPattern=".*\\.mp3" />
+                <data android:pathPattern=".*\\.wav" />
+                <data android:pathPattern=".*\\.ogg" />
+                <data android:pathPattern=".*\\.oga" />
+                <data android:pathPattern=".*\\.flac" />
+                <data android:pathPattern=".*\\.m4a" />
+                <data android:pathPattern=".*\\.aac" />
+                <data android:pathPattern=".*\\.opus" />
+                <data android:pathPattern=".*\\.wma" />
+                <data android:pathPattern=".*\\.aiff" />
+                <data android:pathPattern=".*\\.mid" />
+                <data android:pathPattern=".*\\.midi" />
+                <data android:pathPattern=".*\\.amr" />
+                <data android:pathPattern=".*\\.alac" />
+                <data android:pathPattern=".*\\.ape" />
+                <!-- Documents -->
+                <data android:pathPattern=".*\\.pdf" />
+                <data android:pathPattern=".*\\.doc" />
+                <data android:pathPattern=".*\\.docx" />
+                <data android:pathPattern=".*\\.dot" />
+                <data android:pathPattern=".*\\.dotx" />
+                <data android:pathPattern=".*\\.odt" />
+                <data android:pathPattern=".*\\.ott" />
+                <data android:pathPattern=".*\\.rtf" />
+                <data android:pathPattern=".*\\.pages" />
+                <data android:pathPattern=".*\\.gdoc" />
+                <data android:pathPattern=".*\\.xls" />
+                <data android:pathPattern=".*\\.xlsx" />
+                <data android:pathPattern=".*\\.ods" />
+                <data android:pathPattern=".*\\.csv" />
+                <data android:pathPattern=".*\\.tsv" />
+                <data android:pathPattern=".*\\.gsheet" />
+                <data android:pathPattern=".*\\.xps" />
+                <data android:pathPattern=".*\\.oxps" />
+                <!-- Presentations -->
+                <data android:pathPattern=".*\\.ppt" />
+                <data android:pathPattern=".*\\.pptx" />
+                <data android:pathPattern=".*\\.pps" />
+                <data android:pathPattern=".*\\.ppsx" />
+                <data android:pathPattern=".*\\.pot" />
+                <data android:pathPattern=".*\\.potx" />
+                <data android:pathPattern=".*\\.odp" />
+                <data android:pathPattern=".*\\.key" />
+                <data android:pathPattern=".*\\.keynote" />
+                <data android:pathPattern=".*\\.gslides" />
+                <!-- Ebooks & Plain text -->
+                <data android:pathPattern=".*\\.epub" />
+                <data android:pathPattern=".*\\.fb2" />
+                <data android:pathPattern=".*\\.txt" />
+                <data android:pathPattern=".*\\.text" />
+                <data android:pathPattern=".*\\.log" />
+                <data android:pathPattern=".*\\.md" />
+                <data android:pathPattern=".*\\.markdown" />
+                <data android:pathPattern=".*\\.mobi" />
+                <data android:pathPattern=".*\\.azw" />
+                <data android:pathPattern=".*\\.azw3" />
+                <data android:pathPattern=".*\\.djvu" />
+                <data android:pathPattern=".*\\.djv" />
+                <data android:pathPattern=".*\\.chm" />
+                <!-- Uppercase common variants -->
                 <data android:pathPattern=".*\\.CBZ" />
                 <data android:pathPattern=".*\\.CBR" />
                 <data android:pathPattern=".*\\.ZIP" />
+                <data android:pathPattern=".*\\.RAR" />
+                <data android:pathPattern=".*\\.7Z" />
                 <data android:pathPattern=".*\\.JPG" />
                 <data android:pathPattern=".*\\.JPEG" />
                 <data android:pathPattern=".*\\.PNG" />
@@ -198,6 +463,22 @@
                 <data android:pathPattern=".*\\.GIF" />
                 <data android:pathPattern=".*\\.MP4" />
                 <data android:pathPattern=".*\\.MKV" />
+                <data android:pathPattern=".*\\.MP3" />
+                <data android:pathPattern=".*\\.WAV" />
+                <data android:pathPattern=".*\\.FLAC" />
+                <data android:pathPattern=".*\\.M4A" />
+                <data android:pathPattern=".*\\.PDF" />
+                <data android:pathPattern=".*\\.DOC" />
+                <data android:pathPattern=".*\\.DOCX" />
+                <data android:pathPattern=".*\\.XLS" />
+                <data android:pathPattern=".*\\.XLSX" />
+                <data android:pathPattern=".*\\.PPT" />
+                <data android:pathPattern=".*\\.PPTX" />
+                <data android:pathPattern=".*\\.EPUB" />
+                <data android:pathPattern=".*\\.FB2" />
+                <data android:pathPattern=".*\\.TXT" />
+                <data android:pathPattern=".*\\.MD" />
+                <data android:pathPattern=".*\\.MOBI" />
             </intent-filter>
         </activity>
     </application>

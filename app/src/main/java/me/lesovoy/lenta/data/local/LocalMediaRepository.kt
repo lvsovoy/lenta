@@ -18,19 +18,29 @@ class LocalMediaRepository(private val context: Context? = null) {
             "png", "apng", "webp", "bmp", "dib",
             "heic", "heif", "avif", "avis", "jxl", "tif", "tiff", "svg"
         )
-        val VIDEO_EXTENSIONS = setOf("mp4", "mkv", "webm", "avi", "mov", "3gp", "ts", "m4v", "flv", "wmv")
+        val VIDEO_EXTENSIONS = setOf("mp4", "mkv", "webm", "avi", "mov", "3gp", "ts", "m4v", "flv", "wmv", "ogv", "vob")
         val GIF_EXTENSIONS = setOf("gif")
-        val COMIC_EXTENSIONS = setOf("cbz", "zip", "cbr", "cb7", "cbt")
+        val COMIC_EXTENSIONS = setOf("cbz", "zip", "cbr", "cb7", "cbt", "cba", "rar", "7z", "tar", "gz")
+        val AUDIO_EXTENSIONS = setOf(
+            "mp3", "wav", "wave", "ogg", "oga", "flac", "m4a", "aac", "opus", "wma",
+            "aiff", "aif", "mid", "midi", "amr", "alac", "ape", "ac3", "dts", "mka", "ra", "ram"
+        )
+        val DOCUMENT_EXTENSIONS = setOf(
+            "doc", "docx", "dot", "dotx", "docm", "dotm", "odt", "ott", "rtf", "pages", "gdoc",
+            "wpd", "wps", "oxps", "xps", "pdf", "xls", "xlsx", "xlsm", "xlt", "xltx", "ods", "ots",
+            "csv", "tsv", "numbers", "gsheet"
+        )
+        val EBOOK_EXTENSIONS = setOf(
+            "epub", "fb2", "txt", "text", "log", "md", "markdown", "mobi", "azw", "azw3", "prc",
+            "lit", "djvu", "djv", "nfo", "chm"
+        )
+        val PRESENTATION_EXTENSIONS = setOf(
+            "ppt", "pptx", "pps", "ppsx", "pot", "potx", "pptm", "potm", "ppsm", "odp", "otp",
+            "key", "keynote", "gslides", "gpresentation"
+        )
 
         fun getMediaType(file: File): MediaType? {
-            val ext = file.extension.lowercase(Locale.ROOT)
-            return when {
-                ext in GIF_EXTENSIONS -> MediaType.GIF
-                ext in VIDEO_EXTENSIONS -> MediaType.VIDEO
-                ext in COMIC_EXTENSIONS -> MediaType.CBZ
-                ext in IMAGE_EXTENSIONS -> MediaType.IMAGE
-                else -> null
-            }
+            return getMediaTypeFromExtension(file.extension)
         }
 
         fun getMediaTypeFromExtension(ext: String): MediaType? {
@@ -40,6 +50,10 @@ class LocalMediaRepository(private val context: Context? = null) {
                 lower in VIDEO_EXTENSIONS -> MediaType.VIDEO
                 lower in COMIC_EXTENSIONS -> MediaType.CBZ
                 lower in IMAGE_EXTENSIONS -> MediaType.IMAGE
+                lower in AUDIO_EXTENSIONS -> MediaType.AUDIO
+                lower in PRESENTATION_EXTENSIONS -> MediaType.PRESENTATION
+                lower in EBOOK_EXTENSIONS -> MediaType.EBOOK
+                lower in DOCUMENT_EXTENSIONS -> MediaType.DOCUMENT
                 else -> null
             }
         }

@@ -32,8 +32,13 @@ object MediaIntentResolver {
             val lowerMime = mimeType.lowercase(Locale.ROOT)
             when {
                 lowerMime == "image/gif" -> return MediaType.GIF
+                lowerMime.startsWith("audio/") -> return MediaType.AUDIO
                 lowerMime.startsWith("video/") -> return MediaType.VIDEO
                 lowerMime.startsWith("image/") -> return MediaType.IMAGE
+                lowerMime.contains("presentation") || lowerMime.contains("powerpoint") || lowerMime.contains("slides") || lowerMime.contains("keynote") -> return MediaType.PRESENTATION
+                lowerMime.contains("epub") || lowerMime.contains("fb2") || lowerMime.contains("fictionbook") ||
+                        lowerMime.contains("mobipocket") || lowerMime.contains("amazon.mobi") || lowerMime.contains("djvu") || lowerMime.contains("chm") -> return MediaType.EBOOK
+                lowerMime.startsWith("text/") && (lowerMime.contains("plain") || lowerMime.contains("markdown")) -> return MediaType.EBOOK
                 lowerMime in setOf(
                     "application/x-cbz",
                     "application/vnd.comicbook+zip",
@@ -41,9 +46,27 @@ object MediaIntentResolver {
                     "application/vnd.comicbook-rar",
                     "application/x-cb7",
                     "application/x-cbt",
+                    "application/x-rar-compressed",
+                    "application/vnd.rar",
+                    "application/x-7z-compressed",
+                    "application/x-tar",
+                    "application/gzip",
+                    "application/x-gzip"
+                ) -> return MediaType.CBZ
+                lowerMime.contains("word") || lowerMime.contains("document") || lowerMime.contains("pdf") ||
+                        lowerMime.contains("spreadsheet") || lowerMime.contains("excel") || lowerMime.contains("rtf") ||
+                        lowerMime.contains("opendocument") || lowerMime.contains("xps") || lowerMime.contains("pages") ||
+                        lowerMime.contains("csv") || lowerMime.contains("tab-separated") -> return MediaType.DOCUMENT
+                lowerMime in setOf(
                     "application/zip",
                     "application/x-zip-compressed"
                 ) -> return MediaType.CBZ
+                lowerMime in setOf(
+                    "application/ogg",
+                    "application/x-ogg",
+                    "application/opus",
+                    "application/x-flac"
+                ) -> return MediaType.AUDIO
             }
         }
 
