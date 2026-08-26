@@ -410,15 +410,6 @@ class SourceEditDialog(
             autoUpdateDisplayName()
         }
 
-        if (existingSource != null && existingSource.type != StorageSourceType.LOCAL) {
-            binding.btnDeleteSource.visibility = View.VISIBLE
-            binding.btnDeleteSource.setOnClickListener {
-                confirmDeleteSource()
-            }
-        } else {
-            binding.btnDeleteSource.visibility = View.GONE
-        }
-
         binding.btnSaveSource.setOnClickListener {
             val source = buildSourceFromForm()
             val manager = StorageSourceManager(requireContext())
@@ -426,21 +417,6 @@ class SourceEditDialog(
             onSourceSaved?.invoke(saved)
             dismiss()
         }
-    }
-
-    private fun confirmDeleteSource() {
-        val sourceToDelete = existingSource ?: return
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.remove_source_dialog_title)
-            .setMessage(getString(R.string.remove_source_dialog_message, sourceToDelete.name))
-            .setPositiveButton(R.string.remove_source_confirm) { _, _ ->
-                val manager = StorageSourceManager(requireContext())
-                manager.deleteSource(sourceToDelete.id)
-                onSourceSaved?.invoke(sourceToDelete)
-                dismiss()
-            }
-            .setNegativeButton(R.string.remove_source_cancel, null)
-            .show()
     }
 
     private fun testConnection() {

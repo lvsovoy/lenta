@@ -93,12 +93,13 @@ class SettingsFragment : Fragment() {
             cardBinding.tvSourceSubtitle.text = source.getDisplaySubtitle()
 
             val iconRes = when (source.type) {
+                StorageSourceType.NEXTCLOUD -> R.drawable.ic_nextcloud
                 StorageSourceType.WEBDAV -> R.drawable.ic_webdav
                 StorageSourceType.GOOGLE_DRIVE -> R.drawable.ic_google_drive
                 StorageSourceType.ONEDRIVE -> R.drawable.ic_onedrive
                 StorageSourceType.SMB -> R.drawable.ic_smb
                 StorageSourceType.FTP -> R.drawable.ic_ftp
-                else -> R.drawable.ic_cloud
+                else -> R.drawable.ic_nextcloud
             }
             cardBinding.ivSourceIcon.setImageResource(iconRes)
             cardBinding.tvSourceTypeTag.visibility = View.VISIBLE

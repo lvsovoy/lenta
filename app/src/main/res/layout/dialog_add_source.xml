@@ -63,7 +63,7 @@
                         android:background="@drawable/rounded_shape"
                         android:backgroundTint="?attr/colorPrimaryContainer"
                         android:padding="9dp"
-                        android:src="@drawable/ic_cloud"
+                        android:src="@drawable/ic_nextcloud"
                         app:tint="?attr/colorOnPrimaryContainer" />
 
                     <LinearLayout
@@ -789,15 +789,6 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_delete_source"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="?attr/colorError"
-                    android:text="@string/remove_source_confirm"
-                    android:visibility="gone" />
 
                 <View
                     android:layout_width="0dp"

@@ -61,7 +61,7 @@ class FilesFragment : Fragment() {
 
             val iconRes = when (source.type) {
                 StorageSourceType.LOCAL -> R.drawable.ic_folder
-                StorageSourceType.NEXTCLOUD -> R.drawable.ic_cloud
+                StorageSourceType.NEXTCLOUD -> R.drawable.ic_nextcloud
                 StorageSourceType.WEBDAV -> R.drawable.ic_webdav
                 StorageSourceType.GOOGLE_DRIVE -> R.drawable.ic_google_drive
                 StorageSourceType.ONEDRIVE -> R.drawable.ic_onedrive
