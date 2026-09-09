@@ -2,6 +2,7 @@ package me.lesovoy.lenta.ui.browser
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -91,12 +92,24 @@ class LocalBrowserFragment : Fragment() {
             }
         }
 
-        binding.recyclerFiles.layoutManager = GridLayoutManager(requireContext(), 2)
+        binding.recyclerFiles.layoutManager = GridLayoutManager(requireContext(), getOptimalSpanCount())
         binding.recyclerFiles.adapter = adapter
 
         binding.swipeRefresh.setOnRefreshListener {
             loadDirectory(currentDirectory)
         }
+    }
+
+    private fun getOptimalSpanCount(): Int {
+        val resourceColumns = resources.getInteger(R.integer.grid_columns)
+        val screenWidthDp = resources.configuration.screenWidthDp
+        val computedColumns = (screenWidthDp / 160).coerceAtLeast(2)
+        return maxOf(resourceColumns, computedColumns)
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        (binding.recyclerFiles.layoutManager as? GridLayoutManager)?.spanCount = getOptimalSpanCount()
     }
 
     private fun setupStorageChips() {

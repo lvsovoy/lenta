@@ -1,5 +1,6 @@
 package me.lesovoy.lenta.ui.nextcloud
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -98,12 +99,24 @@ class NextcloudFragment : Fragment() {
             }
         }
 
-        binding.recyclerNextcloud.layoutManager = GridLayoutManager(requireContext(), 2)
+        binding.recyclerNextcloud.layoutManager = GridLayoutManager(requireContext(), getOptimalSpanCount())
         binding.recyclerNextcloud.adapter = adapter
 
         binding.swipeRefreshNextcloud.setOnRefreshListener {
             loadFolder(currentRemotePath)
         }
+    }
+
+    private fun getOptimalSpanCount(): Int {
+        val resourceColumns = resources.getInteger(R.integer.grid_columns)
+        val screenWidthDp = resources.configuration.screenWidthDp
+        val computedColumns = (screenWidthDp / 160).coerceAtLeast(2)
+        return maxOf(resourceColumns, computedColumns)
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        (binding.recyclerNextcloud.layoutManager as? GridLayoutManager)?.spanCount = getOptimalSpanCount()
     }
 
     private fun setupControls() {

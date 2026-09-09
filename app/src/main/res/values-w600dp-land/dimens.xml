@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="fragment_horizontal_margin">24dp</dimen>
+    <dimen name="file_grid_thumbnail_height">120dp</dimen>
+    <dimen name="nav_header_height">120dp</dimen>
+</resources>
