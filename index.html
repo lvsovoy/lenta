@@ -4,369 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="ZtHjuldc7rMnnBgxdYXIUR3T93fmiuFQ7Y9afFkG1KY" />
-    <meta name="description" content="Lenta - Modern, privacy-focused media viewer and multi-cloud storage browser for Android.">
+    <meta name="description" content="Lenta - Modern, privacy-first media viewer and multi-cloud storage browser for Android. Stream video, audio with waveforms, CBZ comics, PDFs, and browse Google Drive, OneDrive, Nextcloud, SMB, WebDAV, FTP.">
     <meta name="theme-color" content="#1976d2">
-    <title>Lenta - Modern Media Viewer & Multi-Cloud Browser</title>
-    <style>
-        :root {
-            --md-sys-color-primary: #1976d2;
-            --md-sys-color-on-primary: #ffffff;
-            --md-sys-color-primary-container: #d2e4ff;
-            --md-sys-color-on-primary-container: #001c3b;
-            --md-sys-color-secondary: #535f70;
-            --md-sys-color-on-secondary: #ffffff;
-            --md-sys-color-secondary-container: #d7e3f8;
-            --md-sys-color-on-secondary-container: #101c2b;
-            --md-sys-color-surface: #fdfcff;
-            --md-sys-color-on-surface: #1a1c1e;
-            --md-sys-color-surface-variant: #e0e2ec;
-            --md-sys-color-on-surface-variant: #43474e;
-            --md-sys-color-outline: #73777f;
-            --md-sys-color-outline-variant: #c4c7cf;
-            --md-sys-color-background: #fdfcff;
-            --md-sys-color-on-background: #1a1c1e;
-            --md-sys-color-card: #ffffff;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-            --radius-sm: 8px;
-            --radius-md: 16px;
-            --radius-lg: 24px;
-            --radius-full: 9999px;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --md-sys-color-primary: #9ecaff;
-                --md-sys-color-on-primary: #003258;
-                --md-sys-color-primary-container: #00497d;
-                --md-sys-color-on-primary-container: #d2e4ff;
-                --md-sys-color-secondary: #bbc7db;
-                --md-sys-color-on-secondary: #253140;
-                --md-sys-color-secondary-container: #3c4858;
-                --md-sys-color-on-secondary-container: #d7e3f8;
-                --md-sys-color-surface: #1a1c1e;
-                --md-sys-color-on-surface: #e2e2e6;
-                --md-sys-color-surface-variant: #43474e;
-                --md-sys-color-on-surface-variant: #c4c7cf;
-                --md-sys-color-outline: #8d9199;
-                --md-sys-color-outline-variant: #43474e;
-                --md-sys-color-background: #121316;
-                --md-sys-color-on-background: #e2e2e6;
-                --md-sys-color-card: #1e2023;
-                --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-                --shadow-md: 0 4px 6px rgba(0,0,0,0.4);
-                --shadow-lg: 0 10px 20px rgba(0,0,0,0.5);
-            }
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--md-sys-color-background);
-            color: var(--md-sys-color-on-background);
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        header {
-            border-bottom: 1px solid var(--md-sys-color-outline-variant);
-            position: sticky;
-            top: 0;
-            background: var(--md-sys-color-background);
-            backdrop-filter: blur(8px);
-            z-index: 100;
-        }
-
-        .nav-container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 1rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            text-decoration: none;
-            color: var(--md-sys-color-on-background);
-            font-size: 1.35rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-        }
-
-        .brand-icon {
-            width: 36px;
-            height: 36px;
-            background: var(--md-sys-color-primary);
-            color: var(--md-sys-color-on-primary);
-            border-radius: var(--radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            font-weight: 800;
-        }
-
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 1.25rem;
-            list-style: none;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--md-sys-color-on-surface-variant);
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: color 0.2s ease;
-        }
-
-        .nav-links a:hover {
-            color: var(--md-sys-color-primary);
-        }
-
-        .hero {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 4.5rem 1.5rem 3rem;
-            text-align: center;
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--md-sys-color-primary-container);
-            color: var(--md-sys-color-on-primary-container);
-            padding: 0.35rem 1rem;
-            border-radius: var(--radius-full);
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-        }
-
-        .hero h1 {
-            font-size: clamp(2.2rem, 5vw, 3.5rem);
-            font-weight: 800;
-            line-height: 1.15;
-            letter-spacing: -0.03em;
-            margin-bottom: 1.25rem;
-        }
-
-        .hero p {
-            font-size: clamp(1.05rem, 2vw, 1.25rem);
-            color: var(--md-sys-color-on-surface-variant);
-            max-width: 700px;
-            margin: 0 auto 2.5rem;
-        }
-
-        .cta-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            justify-content: center;
-            margin-bottom: 3.5rem;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.85rem 1.75rem;
-            border-radius: var(--radius-full);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-            cursor: pointer;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-primary {
-            background: var(--md-sys-color-primary);
-            color: var(--md-sys-color-on-primary);
-        }
-
-        .btn-secondary {
-            background: var(--md-sys-color-secondary-container);
-            color: var(--md-sys-color-on-secondary-container);
-            border: 1px solid var(--md-sys-color-outline-variant);
-        }
-
-        .features {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 2rem 1.5rem 4rem;
-        }
-
-        .section-title {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .section-title h2 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.02em;
-        }
-
-        .section-title p {
-            color: var(--md-sys-color-on-surface-variant);
-            font-size: 1.05rem;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .card {
-            background: var(--md-sys-color-card);
-            border: 1px solid var(--md-sys-color-outline-variant);
-            border-radius: var(--radius-md);
-            padding: 1.75rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .card-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: var(--radius-sm);
-            background: var(--md-sys-color-primary-container);
-            color: var(--md-sys-color-on-primary-container);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .card h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .card p {
-            color: var(--md-sys-color-on-surface-variant);
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        .compliance-banner {
-            max-width: 1100px;
-            margin: 0 auto 4rem;
-            padding: 0 1.5rem;
-        }
-
-        .banner-inner {
-            background: var(--md-sys-color-secondary-container);
-            color: var(--md-sys-color-on-secondary-container);
-            border-radius: var(--radius-md);
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            border: 1px solid var(--md-sys-color-outline-variant);
-        }
-
-        .banner-inner h3 {
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-
-        .banner-inner p {
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        .banner-links {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-top: 0.5rem;
-        }
-
-        footer {
-            border-top: 1px solid var(--md-sys-color-outline-variant);
-            background: var(--md-sys-color-surface);
-            padding: 3rem 1.5rem;
-        }
-
-        .footer-container {
-            max-width: 1100px;
-            margin: 0 auto;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .footer-left {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-
-        .footer-left p {
-            font-size: 0.875rem;
-            color: var(--md-sys-color-on-surface-variant);
-        }
-
-        .footer-links {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1.5rem;
-            list-style: none;
-        }
-
-        .footer-links a {
-            text-decoration: none;
-            color: var(--md-sys-color-on-surface-variant);
-            font-size: 0.9rem;
-            transition: color 0.2s ease;
-        }
-
-        .footer-links a:hover {
-            color: var(--md-sys-color-primary);
-        }
-    </style>
+    
+    <!-- App Icons & Favicon -->
+    <link rel="icon" type="image/svg+xml" href=".gh_pages/icon.svg">
+    <link rel="apple-touch-icon" href=".gh_pages/icon.svg">
+    
+    <title>Lenta - Modern Media Viewer & Multi-Cloud Browser for Android</title>
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href=".gh_pages/styles.css">
 </head>
 <body>
     <header>
         <nav class="nav-container">
             <a href="index.html" class="brand">
-                <div class="brand-icon">L</div>
+                <img src=".gh_pages/icon.svg" alt="Lenta App Icon" class="brand-icon">
                 <span>Lenta</span>
             </a>
             <ul class="nav-links">
                 <li><a href="#features">Features</a></li>
+                <li><a href="#storage">Cloud & Storage</a></li>
+                <li><a href="#media">Media Player</a></li>
                 <li><a href="privacy.html">Privacy</a></li>
                 <li><a href="terms.html">Terms</a></li>
                 <li><a href="https://github.com/lvsovoy/lenta" target="_blank" rel="noopener">GitHub</a></li>
@@ -375,10 +35,11 @@
     </header>
 
     <main>
+        <!-- Hero Section -->
         <section class="hero">
-            <div class="hero-badge">Android 13+ (API 33+) &bull; Free & Open Source</div>
-            <h1>Your Media & Cloud Storage,<br>Unified & Private</h1>
-            <p>A fast, modern Android media viewer and multi-cloud file browser with Material 3 dynamic theming, universal codec support, and zero data tracking.</p>
+            <div class="hero-badge">Android 13+ (API 33+) &bull; Free & Open Source &bull; No Ads</div>
+            <h1>Unified Media Viewer &amp;<br>Multi-Cloud Storage Browser</h1>
+            <p>Lenta brings together your local storage, cloud drives, and network servers into a single, high-performance Android application with Material 3 dynamic theming, universal media playback, interactive audio waveforms, and zero tracking.</p>
             <div class="cta-buttons">
                 <a href="https://github.com/lvsovoy/lenta/releases/latest" class="btn btn-primary" target="_blank" rel="noopener">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
@@ -386,57 +47,134 @@
                 </a>
                 <a href="https://github.com/lvsovoy/lenta" class="btn btn-secondary" target="_blank" rel="noopener">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
-                    View Source on GitHub
+                    View on GitHub
                 </a>
             </div>
         </section>
 
+        <!-- Core App Features Grid -->
         <section class="features" id="features">
             <div class="section-title">
-                <h2>Built for Power & Simplicity</h2>
-                <p>Everything you need to view, browse, and organize your files across devices and cloud drives.</p>
+                <h2>Built for Speed, Versatility &amp; Privacy</h2>
+                <p>Designed from the ground up to give you complete freedom over your files without compromises or third-party cloud lock-in.</p>
             </div>
             <div class="grid">
-                <div class="card">
-                    <div class="card-icon">&#9654;</div>
-                    <h3>Universal Media Viewer</h3>
-                    <p>Stream and play video (MKV, MP4, WebM) with hardware acceleration, audio with live waveform preview, comics (CBZ/CBR), documents (PDF/EPUB), and animated GIFs.</p>
-                </div>
-                <div class="card">
+                <!-- Card 1: Multi-Cloud -->
+                <div class="card" id="storage">
                     <div class="card-icon">&#9729;</div>
-                    <h3>Multi-Cloud Storage</h3>
-                    <p>Directly connect Google Drive, Microsoft OneDrive, and Nextcloud alongside your local storage. Seamlessly browse remote folders and stream without downloading everything.</p>
+                    <h3>Multi-Cloud &amp; Network Storage</h3>
+                    <p>Connect and browse all your remote drives and servers directly alongside local storage. Stream remote videos and audio on the fly without waiting for full downloads.</p>
+                    <ul>
+                        <li><strong>Google Drive:</strong> OAuth2 authentication &amp; Google Drive API v3</li>
+                        <li><strong>Microsoft OneDrive:</strong> Microsoft Graph API &amp; Entra ID</li>
+                        <li><strong>Nextcloud / ownCloud:</strong> WebDAV &amp; QR Code instant setup</li>
+                        <li><strong>SMB / Windows Shares:</strong> CIFS/SMB2/SMB3 LAN protocol</li>
+                        <li><strong>WebDAV &amp; FTP:</strong> Generic NAS, Synology &amp; server connections</li>
+                    </ul>
                 </div>
+
+                <!-- Card 2: Universal Media Engine -->
+                <div class="card" id="media">
+                    <div class="card-icon">&#9654;</div>
+                    <h3>Universal Media Player Engine</h3>
+                    <p>Hardware-accelerated playback for videos, audio tracks, comic books, digital documents, and image galleries with smooth gestures and quick drawer navigation.</p>
+                    <ul>
+                        <li><strong>Video Player:</strong> MKV, MP4, WebM, AVI, MOV with multi-audio, subtitle tracks, speed control, ±5s seek &amp; orientation lock</li>
+                        <li><strong>Audio with Waveforms:</strong> Visual waveform preview, scrub seeking, embedded metadata tags (artist, album, bitrate)</li>
+                        <li><strong>Comics &amp; Manga:</strong> CBZ, CBR, ZIP archives with smooth page-curl transitions, pinch zoom &amp; tap zones</li>
+                        <li><strong>Documents &amp; eBooks:</strong> High-definition PDF rendering &amp; EPUB readers</li>
+                        <li><strong>Images &amp; GIFs:</strong> Ultra-fast hardware decoding, animated GIFs, deep pinch-to-zoom</li>
+                    </ul>
+                </div>
+
+                <!-- Card 3: Privacy Architecture -->
                 <div class="card">
                     <div class="card-icon">&#128274;</div>
-                    <h3>Privacy-First Architecture</h3>
-                    <p>Client-only processing with zero analytics, no telemetry, and no intermediate servers. OAuth tokens and files stay strictly on your local device.</p>
+                    <h3>100% Privacy-First Architecture</h3>
+                    <p>Lenta is client-only. It communicates directly and securely from your device to your storage providers with zero middleman proxy servers.</p>
+                    <ul>
+                        <li>Zero analytics, zero tracking, and no advertising SDKs</li>
+                        <li>Credentials &amp; OAuth tokens stored securely on your local device</li>
+                        <li>Strict compliance with Google API &amp; Microsoft Entra Limited Use policies</li>
+                        <li>Open-source codebase for full transparency and security auditability</li>
+                    </ul>
                 </div>
-                <div class="card">
-                    <div class="card-icon">&#127912;</div>
-                    <h3>Material 3 Dynamic Colors</h3>
-                    <p>Beautiful, adaptive UI that pulls wallpaper accent colors on Android 12+ and seamlessly supports light and dark system themes.</p>
-                </div>
+
+                <!-- Card 4: Smart Thumbnails -->
                 <div class="card">
                     <div class="card-icon">&#9889;</div>
-                    <h3>Fast Smart Thumbnails</h3>
-                    <p>Smart video frame selection and background thumbnail caching generate crystal-clear previews while optimizing device RAM and storage.</p>
+                    <h3>Intelligent Thumbnail Engine</h3>
+                    <p>Fast visual file browsing powered by background extraction and multi-tier memory and disk caching.</p>
+                    <ul>
+                        <li><strong>Video Frame Sampling:</strong> Extracts clear representative frames at optimal timestamps</li>
+                        <li><strong>Comic Cover Extractor:</strong> Instantly unpacks and renders CBZ/CBR cover artwork</li>
+                        <li><strong>LRU Memory &amp; Disk Cache:</strong> Low memory footprint with instant cache reuse</li>
+                        <li>Built-in cache management settings to purge or limit disk storage usage</li>
+                    </ul>
                 </div>
+
+                <!-- Card 5: Material Design 3 -->
+                <div class="card">
+                    <div class="card-icon">&#127912;</div>
+                    <h3>Material Design 3</h3>
+                    <p>Clean, modern UI designed according to the latest Android design standards with comprehensive theming.</p>
+                    <ul>
+                        <li>Full Light and Dark system theme adaptation</li>
+                        <li>Collapsible media playlist side-drawer for instant file switching</li>
+                        <li>Interactive indicator badges and responsive grid/list layouts</li>
+                        <li>Smooth animations and edge-to-edge layout design</li>
+                    </ul>
+                </div>
+
+                <!-- Card 6: In-App Updates -->
                 <div class="card">
                     <div class="card-icon">&#128260;</div>
-                    <h3>Seamless Updates</h3>
-                    <p>Built-in update checker alerts you to new releases with rich changelogs and one-tap APK installation directly from GitHub.</p>
+                    <h3>In-App Updates</h3>
+                    <p>Seamless version checking and direct installation built directly into the app.</p>
+                    <ul>
+                        <li><strong>GitHub Releases Integration:</strong> Automatically detects new versions with rich release changelogs</li>
+                        <li><strong>One-Tap Download:</strong> Fast in-app background download for new APK releases</li>
+                        <li><strong>Direct Installation:</strong> Seamless package installer prompt to update without leaving the app</li>
+                    </ul>
                 </div>
             </div>
         </section>
 
+        <!-- Technical Specifications Section -->
+        <section class="specs-section">
+            <div class="section-title">
+                <h2>Technical Specifications</h2>
+                <p>Engineered with modern Android development best practices and robust architectural components.</p>
+            </div>
+            <div class="specs-grid">
+                <div class="spec-box">
+                    <h4>Platform &amp; OS</h4>
+                    <p>Android 13+ (API Level 33+) for optimal performance, modern permissions, and hardware acceleration.</p>
+                </div>
+                <div class="spec-box">
+                    <h4>Core Stack</h4>
+                    <p>Kotlin 2.0, MVVM Architecture, Kotlin Coroutines, StateFlow, and Jetpack AndroidX components.</p>
+                </div>
+                <div class="spec-box">
+                    <h4>Media Stack</h4>
+                    <p>ExoPlayer / Media3 for high-fidelity audio/video, Coil for image rendering, and custom vector decoders.</p>
+                </div>
+                <div class="spec-box">
+                    <h4>Open Source</h4>
+                    <p>Licensed under CC BY-NC-SA 4.0. Completely free, customizable, and developer-friendly.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Compliance & Legal Banner -->
         <section class="compliance-banner">
             <div class="banner-inner">
-                <h3>Legal & Privacy Transparency</h3>
-                <p>Lenta complies with Google API Services User Data Policy (including Limited Use requirements) and Microsoft Entra application security standards. Your data is always yours.</p>
+                <h3>Privacy Transparency &amp; Developer Integration</h3>
+                <p>Lenta respects user privacy and complies with all official developer security standards, including Google Cloud OAuth Limited Use and Microsoft Entra verified publisher requirements. Ready for custom developer credentials and enterprise deployments.</p>
                 <div class="banner-links">
-                    <a href="privacy.html" class="btn btn-secondary" style="font-size: 0.875rem; padding: 0.5rem 1.25rem;">Read Privacy Policy</a>
-                    <a href="terms.html" class="btn btn-secondary" style="font-size: 0.875rem; padding: 0.5rem 1.25rem;">Read Terms of Service</a>
+                    <a href="privacy.html" class="btn btn-secondary" style="font-size: 0.875rem; padding: 0.5rem 1.25rem;">Privacy Policy</a>
+                    <a href="terms.html" class="btn btn-secondary" style="font-size: 0.875rem; padding: 0.5rem 1.25rem;">Terms of Service</a>
+                    <a href=".well-known/microsoft-identity-association.json" class="btn btn-secondary" style="font-size: 0.875rem; padding: 0.5rem 1.25rem;" target="_blank">Microsoft Identity Verification</a>
                 </div>
             </div>
         </section>
@@ -446,9 +184,10 @@
         <div class="footer-container">
             <div class="footer-left">
                 <strong>Lenta</strong>
-                <p>Licensed under CC BY-NC-SA 4.0 &bull; Open Source Android App</p>
+                <p>Open Source Media Viewer &amp; Cloud Browser for Android &bull; CC BY-NC-SA 4.0</p>
             </div>
             <ul class="footer-links">
+                <li><a href="#features">Features</a></li>
                 <li><a href="privacy.html">Privacy Policy</a></li>
                 <li><a href="terms.html">Terms of Service</a></li>
                 <li><a href="https://github.com/lvsovoy/lenta" target="_blank" rel="noopener">GitHub Repository</a></li>

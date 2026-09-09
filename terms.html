@@ -5,250 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Terms of Service for Lenta - Android Media Viewer & Cloud File Browser">
     <meta name="theme-color" content="#1976d2">
+    
+    <!-- App Icons & Favicon -->
+    <link rel="icon" type="image/svg+xml" href=".gh_pages/icon.svg">
+    <link rel="apple-touch-icon" href=".gh_pages/icon.svg">
+    
     <title>Terms of Service - Lenta</title>
-    <style>
-        :root {
-            --md-sys-color-primary: #1976d2;
-            --md-sys-color-on-primary: #ffffff;
-            --md-sys-color-primary-container: #d2e4ff;
-            --md-sys-color-on-primary-container: #001c3b;
-            --md-sys-color-secondary: #535f70;
-            --md-sys-color-on-secondary: #ffffff;
-            --md-sys-color-secondary-container: #d7e3f8;
-            --md-sys-color-on-secondary-container: #101c2b;
-            --md-sys-color-surface: #fdfcff;
-            --md-sys-color-on-surface: #1a1c1e;
-            --md-sys-color-surface-variant: #e0e2ec;
-            --md-sys-color-on-surface-variant: #43474e;
-            --md-sys-color-outline: #73777f;
-            --md-sys-color-outline-variant: #c4c7cf;
-            --md-sys-color-background: #fdfcff;
-            --md-sys-color-on-background: #1a1c1e;
-            --md-sys-color-card: #ffffff;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-            --radius-sm: 8px;
-            --radius-md: 16px;
-            --radius-lg: 24px;
-            --radius-full: 9999px;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --md-sys-color-primary: #9ecaff;
-                --md-sys-color-on-primary: #003258;
-                --md-sys-color-primary-container: #00497d;
-                --md-sys-color-on-primary-container: #d2e4ff;
-                --md-sys-color-secondary: #bbc7db;
-                --md-sys-color-on-secondary: #253140;
-                --md-sys-color-secondary-container: #3c4858;
-                --md-sys-color-on-secondary-container: #d7e3f8;
-                --md-sys-color-surface: #1a1c1e;
-                --md-sys-color-on-surface: #e2e2e6;
-                --md-sys-color-surface-variant: #43474e;
-                --md-sys-color-on-surface-variant: #c4c7cf;
-                --md-sys-color-outline: #8d9199;
-                --md-sys-color-outline-variant: #43474e;
-                --md-sys-color-background: #121316;
-                --md-sys-color-on-background: #e2e2e6;
-                --md-sys-color-card: #1e2023;
-                --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-                --shadow-md: 0 4px 6px rgba(0,0,0,0.4);
-            }
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--md-sys-color-background);
-            color: var(--md-sys-color-on-background);
-            line-height: 1.7;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        header {
-            border-bottom: 1px solid var(--md-sys-color-outline-variant);
-            position: sticky;
-            top: 0;
-            background: var(--md-sys-color-background);
-            backdrop-filter: blur(8px);
-            z-index: 100;
-        }
-
-        .nav-container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 1rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            text-decoration: none;
-            color: var(--md-sys-color-on-background);
-            font-size: 1.35rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-        }
-
-        .brand-icon {
-            width: 36px;
-            height: 36px;
-            background: var(--md-sys-color-primary);
-            color: var(--md-sys-color-on-primary);
-            border-radius: var(--radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            font-weight: 800;
-        }
-
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 1.25rem;
-            list-style: none;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--md-sys-color-on-surface-variant);
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: color 0.2s ease;
-        }
-
-        .nav-links a:hover {
-            color: var(--md-sys-color-primary);
-        }
-
-        .content-container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 3.5rem 1.5rem 5rem;
-        }
-
-        .doc-header {
-            margin-bottom: 2.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid var(--md-sys-color-outline-variant);
-        }
-
-        .doc-header h1 {
-            font-size: clamp(2rem, 4vw, 2.75rem);
-            font-weight: 800;
-            line-height: 1.2;
-            letter-spacing: -0.02em;
-            margin-bottom: 0.5rem;
-        }
-
-        .doc-meta {
-            color: var(--md-sys-color-on-surface-variant);
-            font-size: 0.95rem;
-        }
-
-        h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 2.25rem 0 1rem;
-            letter-spacing: -0.01em;
-            color: var(--md-sys-color-primary);
-        }
-
-        p {
-            margin-bottom: 1.25rem;
-            color: var(--md-sys-color-on-background);
-        }
-
-        ul, ol {
-            margin-bottom: 1.5rem;
-            padding-left: 1.5rem;
-        }
-
-        li {
-            margin-bottom: 0.5rem;
-        }
-
-        .disclaimer-box {
-            background: var(--md-sys-color-surface-variant);
-            color: var(--md-sys-color-on-surface-variant);
-            border-left: 4px solid var(--md-sys-color-outline);
-            padding: 1.25rem 1.5rem;
-            border-radius: var(--radius-sm);
-            margin: 1.5rem 0;
-            font-size: 0.9rem;
-            font-family: monospace;
-            line-height: 1.6;
-        }
-
-        .highlight-box {
-            background: var(--md-sys-color-card);
-            border: 1px solid var(--md-sys-color-outline-variant);
-            border-radius: var(--radius-md);
-            padding: 1.5rem;
-            margin: 1.5rem 0;
-            box-shadow: var(--shadow-sm);
-        }
-
-        a {
-            color: var(--md-sys-color-primary);
-            text-decoration: underline;
-            text-underline-offset: 2px;
-        }
-
-        a:hover {
-            opacity: 0.85;
-        }
-
-        footer {
-            border-top: 1px solid var(--md-sys-color-outline-variant);
-            background: var(--md-sys-color-surface);
-            padding: 2.5rem 1.5rem;
-        }
-
-        .footer-container {
-            max-width: 900px;
-            margin: 0 auto;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .footer-links {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1.5rem;
-            list-style: none;
-        }
-
-        .footer-links a {
-            text-decoration: none;
-            color: var(--md-sys-color-on-surface-variant);
-            font-size: 0.9rem;
-        }
-
-        .footer-links a:hover {
-            color: var(--md-sys-color-primary);
-        }
-    </style>
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href=".gh_pages/styles.css">
 </head>
 <body>
     <header>
         <nav class="nav-container">
             <a href="index.html" class="brand">
-                <div class="brand-icon">L</div>
+                <img src=".gh_pages/icon.svg" alt="Lenta App Icon" class="brand-icon">
                 <span>Lenta</span>
             </a>
             <ul class="nav-links">
@@ -260,73 +31,68 @@
         </nav>
     </header>
 
-    <main class="content-container">
-        <div class="doc-header">
-            <h1>Terms of Service for Lenta</h1>
-            <div class="doc-meta"><strong>Last updated:</strong> September 9, 2026</div>
+    <main class="legal-main">
+        <div class="legal-header">
+            <h1>Terms of Service</h1>
+            <div class="legal-meta">
+                <span><strong>Application:</strong> Lenta for Android</span>
+                <span><strong>Effective Date:</strong> September 9, 2026</span>
+                <span><strong>License:</strong> Creative Commons BY-NC-SA 4.0</span>
+            </div>
         </div>
 
-        <p>Welcome to Lenta! By downloading, installing, or using the Lenta mobile application ("the App"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree with these Terms, please do not use the App.</p>
+        <div class="legal-section">
+            <h2>1. Acceptance of Terms</h2>
+            <p>By downloading, installing, building, or using <strong>Lenta</strong> ("the Application"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Application.</p>
+        </div>
 
-        <h2>1. License &amp; Non-Commercial Use</h2>
-        <div class="highlight-box">
-            <p>Lenta is free and open-source software licensed under the <strong>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)</strong> license.</p>
+        <div class="legal-section">
+            <h2>2. License &amp; Open Source Terms</h2>
+            <p>Lenta is open-source software provided under the <strong>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)</strong> license.</p>
+            <div class="legal-card">
+                <ul>
+                    <li><strong>Attribution:</strong> You must give appropriate credit and provide a link to the original repository.</li>
+                    <li><strong>NonCommercial:</strong> You may not use the material for commercial purposes without prior written authorization.</li>
+                    <li><strong>ShareAlike:</strong> If you remix, transform, or build upon the material, you must distribute your contributions under the same license.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="legal-section">
+            <h2>3. Client-Side Software &amp; Cloud Service Usage</h2>
+            <p>Lenta is a local, client-side tool that enables you to view media and connect to third-party cloud storage and network servers (such as Google Drive, Microsoft OneDrive, Nextcloud, SMB, WebDAV, and FTP).</p>
             <ul>
-                <li>You are free to view, adapt, and share the source code in accordance with the CC BY-NC-SA 4.0 license.</li>
-                <li>Commercial distribution, monetization, or sale of the App or its derivatives is strictly prohibited under the license terms.</li>
+                <li><strong>Your Storage Accounts:</strong> You are solely responsible for maintaining valid credentials and complying with the terms of service of each third-party storage provider you connect.</li>
+                <li><strong>Data Integrity:</strong> File indexing, caching, and stream decoding are performed locally on your device. We are not liable for any issues arising from third-party server outages or network interruptions.</li>
             </ul>
         </div>
 
-        <h2>2. Purpose and Usage</h2>
-        <p>Lenta is designed as a personal, client-side media viewer and file browser for Android devices. You may use the App to organize, browse, preview, and play media files stored locally on your device or in personal cloud storage accounts that you own or are authorized to access.</p>
-
-        <h2>3. Third-Party Cloud Services &amp; Accounts</h2>
-        <ul>
-            <li><strong>Google Drive &amp; Microsoft OneDrive:</strong> Lenta provides client-side integrations with Google Drive and Microsoft OneDrive via official public APIs.</li>
-            <li><strong>Independent Application:</strong> Lenta is an independent open-source project and is not affiliated with, endorsed by, or sponsored by Google LLC or Microsoft Corporation.</li>
-            <li><strong>Compliance with Third-Party Terms:</strong> When accessing third-party cloud services through Lenta, you agree to comply with all applicable terms and conditions of those providers:
-                <ul>
-                    <li><a href="https://policies.google.com/terms" target="_blank" rel="noopener">Google Terms of Service</a></li>
-                    <li><a href="https://www.microsoft.com/servicesagreement" target="_blank" rel="noopener">Microsoft Services Agreement</a></li>
-                </ul>
-            </li>
-            <li><strong>Service Availability:</strong> Lenta is not responsible for any downtime, rate limits, API deprecations, or account suspensions imposed by third-party cloud providers.</li>
-        </ul>
-
-        <h2>4. User Responsibilities</h2>
-        <ul>
-            <li><strong>Content Legality:</strong> You are solely responsible for ensuring that all media, documents, and files accessed or streamed through Lenta comply with applicable copyright and intellectual property laws.</li>
-            <li><strong>Credential Security:</strong> You are responsible for maintaining the physical and digital security of your Android device and any OAuth credentials or API keys you configure.</li>
-        </ul>
-
-        <h2>5. Disclaimer of Warranties</h2>
-        <div class="disclaimer-box">
-            THE APP IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, OR NON-INFRINGEMENT. THE DEVELOPERS DO NOT WARRANT THAT THE APP WILL BE UNINTERRUPTED, SECURE, OR ERROR-FREE.
+        <div class="legal-section">
+            <h2>4. Disclaimer of Warranties</h2>
+            <p>THE APPLICATION IS PROVIDED "AS IS" AND "AS AVAILABLE", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM, OUT OF, OR IN CONNECTION WITH THE APPLICATION OR THE USE OR OTHER DEALINGS IN THE APPLICATION.</p>
         </div>
 
-        <h2>6. Limitation of Liability</h2>
-        <div class="disclaimer-box">
-            TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL THE DEVELOPERS OR CONTRIBUTORS OF LENTA BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES (INCLUDING LOSS OF DATA, DEVICE DAMAGE, OR SERVICE DISRUPTION) ARISING OUT OF OR IN CONNECTION WITH YOUR USE OF OR INABILITY TO USE THE APP.
+        <div class="legal-section">
+            <h2>5. Limitation of Liability</h2>
+            <p>To the maximum extent permitted by applicable law, in no event shall the authors, contributors, or maintainers of Lenta be liable for any direct, indirect, incidental, special, consequential, or exemplary damages, including but not limited to loss of data, loss of profits, device malfunction, or network data overages.</p>
         </div>
 
-        <h2>7. Modifications to Terms</h2>
-        <p>We reserve the right to modify these Terms at any time. Updated versions will be published to this web page and the application repository. Continued use of the App following any changes constitutes acceptance of the modified Terms.</p>
-
-        <h2>8. Contact &amp; Issue Reporting</h2>
-        <p>For questions, feature requests, or bug reports, please visit:</p>
-        <ul>
-            <li><strong>GitHub Repository:</strong> <a href="https://github.com/lvsovoy/lenta" target="_blank" rel="noopener">https://github.com/lvsovoy/lenta</a></li>
-            <li><strong>Issue Tracker:</strong> <a href="https://github.com/lvsovoy/lenta/issues" target="_blank" rel="noopener">https://github.com/lvsovoy/lenta/issues</a></li>
-        </ul>
+        <div class="legal-section">
+            <h2>6. Governing Code &amp; Contributions</h2>
+            <p>Contributions, bug reports, and pull requests submitted to the project repository are subject to the project's license and contributor guidelines:</p>
+            <p><a href="https://github.com/lvsovoy/lenta" target="_blank" rel="noopener">https://github.com/lvsovoy/lenta</a></p>
+        </div>
     </main>
 
     <footer>
         <div class="footer-container">
-            <p>Lenta &bull; Licensed under CC BY-NC-SA 4.0</p>
+            <div class="footer-left">
+                <strong>Lenta</strong>
+                <p>Open Source Media Viewer &amp; Cloud Browser for Android &bull; CC BY-NC-SA 4.0</p>
+            </div>
             <ul class="footer-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="privacy.html">Privacy Policy</a></li>
-                <li><a href="terms.html">Terms of Service</a></li>
                 <li><a href="https://github.com/lvsovoy/lenta" target="_blank" rel="noopener">GitHub</a></li>
             </ul>
         </div>
