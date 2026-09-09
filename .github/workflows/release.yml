@@ -1,0 +1,146 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      major_minor:
+        description: 'Major.Minor version (e.g. 1.0, 1.1, 2.0)'
+        required: true
+        default: '1.0'
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Fetch all tags
+        run: git fetch --tags --force
+
+      - name: Validate no release exists for current commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          HEAD_SHA=$(git rev-parse HEAD)
+          echo "Current master commit SHA: $HEAD_SHA"
+
+          # Check tags pointing at current commit
+          TAGS_ON_HEAD=$(git tag --points-at "$HEAD_SHA")
+          if [ -n "$TAGS_ON_HEAD" ]; then
+            echo "Found tags pointing at HEAD: $TAGS_ON_HEAD"
+            for tag in $TAGS_ON_HEAD; do
+              if gh release view "$tag" >/dev/null 2>&1; then
+                echo "::error::A release for tag '$tag' already exists on commit $HEAD_SHA."
+                exit 1
+              fi
+            done
+          fi
+
+          # Check all existing releases via GitHub API
+          EXISTING_RELEASE_TAGS=$(gh api "repos/${{ github.repository }}/releases" --paginate --jq '.[].tag_name' 2>/dev/null || true)
+          for tag in $EXISTING_RELEASE_TAGS; do
+            if git rev-parse -q --verify "refs/tags/$tag^{commit}" >/dev/null 2>&1; then
+              TAG_SHA=$(git rev-parse "refs/tags/$tag^{commit}")
+              if [ "$TAG_SHA" = "$HEAD_SHA" ]; then
+                echo "::error::Release '$tag' already exists for commit $HEAD_SHA."
+                exit 1
+              fi
+            fi
+          done
+
+          echo "Validation passed: No release exists for commit $HEAD_SHA."
+
+      - name: Determine next version
+        id: version_calc
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          RAW_INPUT="${{ inputs.major_minor }}"
+          CLEAN_INPUT=$(echo "$RAW_INPUT" | sed -E 's/^[vV]//; s/[[:space:]]//g')
+
+          if [[ ! "$CLEAN_INPUT" =~ ^[0-9]+(\.[0-9]+)?(\.[0-9]+)?$ ]]; then
+            echo "::error::Invalid major/minor input '$RAW_INPUT'. Please enter format like '1.0' or '2.1'."
+            exit 1
+          fi
+
+          MAJOR=$(echo "$CLEAN_INPUT" | cut -d. -f1)
+          MINOR=$(echo "$CLEAN_INPUT" | cut -d. -f2)
+          if [ -z "$MINOR" ] || [ "$MINOR" = "$MAJOR" ]; then
+            MINOR=0
+          fi
+
+          echo "Target Major: $MAJOR, Minor: $MINOR"
+
+          # Gather all git tags and GitHub release tags
+          ALL_TAGS=$( { git tag -l; gh api "repos/${{ github.repository }}/releases" --paginate --jq '.[].tag_name' 2>/dev/null || true; } | sort -u )
+
+          HIGHEST_PATCH=-1
+          for tag in $ALL_TAGS; do
+            if [[ "$tag" =~ ^v?${MAJOR}\.${MINOR}\.([0-9]+)$ ]]; then
+              PATCH="${BASH_REMATCH[1]}"
+              if (( 10#$PATCH > HIGHEST_PATCH )); then
+                HIGHEST_PATCH=$(( 10#$PATCH ))
+              fi
+            fi
+          done
+
+          NEXT_PATCH=$(( HIGHEST_PATCH + 1 ))
+          NEW_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}"
+          NEW_TAG="v${NEW_VERSION}"
+          VERSION_CODE=$(( MAJOR * 10000 + MINOR * 100 + NEXT_PATCH ))
+          if (( VERSION_CODE < 1 )); then
+            VERSION_CODE=1
+          fi
+
+          echo "New Version Name: $NEW_VERSION"
+          echo "New Tag: $NEW_TAG"
+          echo "New Version Code: $VERSION_CODE"
+
+          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
+          echo "version_code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build Release APK
+        run: |
+          ./gradlew assembleRelease -PversionName="${{ steps.version_calc.outputs.version }}" -PversionCode="${{ steps.version_calc.outputs.version_code }}"
+
+      - name: Create GitHub Release and Upload APK Asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.version_calc.outputs.tag }}"
+          VERSION="${{ steps.version_calc.outputs.version }}"
+          APK_PATH="app/build/outputs/apk/release/app-release.apk"
+
+          if [ ! -f "$APK_PATH" ]; then
+            echo "::error::Expected APK not found at $APK_PATH"
+            exit 1
+          fi
+
+          echo "Publishing release $TAG..."
+          gh release create "$TAG" "$APK_PATH#app-release.apk" \
+            --target master \
+            --title "$TAG" \
+            --generate-notes

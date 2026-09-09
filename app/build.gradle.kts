@@ -12,8 +12,8 @@ android {
         applicationId = "me.lesovoy.lenta"
         minSdk = 33
         targetSdk = 37
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = (project.findProperty("versionCode") as? String)?.toIntOrNull() ?: 2
+        versionName = (project.findProperty("versionName") as? String) ?: "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
