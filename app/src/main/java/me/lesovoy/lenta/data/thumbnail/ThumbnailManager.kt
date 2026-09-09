@@ -661,6 +661,7 @@ object ThumbnailManager {
                                 if (imageLoader != null) {
                                     val request = ImageRequest.Builder(context)
                                         .data(thumb)
+                                        .memoryCachePolicy(coil.request.CachePolicy.DISABLED)
                                         .size(512, 512)
                                         .build()
                                     imageLoader.execute(request)
@@ -672,6 +673,7 @@ object ThumbnailManager {
                                 if (imageLoader != null) {
                                     val request = ImageRequest.Builder(context)
                                         .data(item.uriString)
+                                        .memoryCachePolicy(coil.request.CachePolicy.DISABLED)
                                         .size(512, 512)
                                         .build()
                                     val result = imageLoader.execute(request)
@@ -689,6 +691,7 @@ object ThumbnailManager {
                                 if (imageLoader != null) {
                                     val request = ImageRequest.Builder(context)
                                         .data(cover)
+                                        .memoryCachePolicy(coil.request.CachePolicy.DISABLED)
                                         .size(512, 512)
                                         .build()
                                     imageLoader.execute(request)
@@ -704,6 +707,7 @@ object ThumbnailManager {
                                 if (imageLoader != null) {
                                     val request = ImageRequest.Builder(context)
                                         .data(cover)
+                                        .memoryCachePolicy(coil.request.CachePolicy.DISABLED)
                                         .size(512, 512)
                                         .build()
                                     imageLoader.execute(request)
@@ -720,6 +724,7 @@ object ThumbnailManager {
                                 if (imageLoader != null) {
                                     val request = ImageRequest.Builder(context)
                                         .data(cachedArt)
+                                        .memoryCachePolicy(coil.request.CachePolicy.DISABLED)
                                         .size(512, 512)
                                         .build()
                                     imageLoader.execute(request)
@@ -734,6 +739,7 @@ object ThumbnailManager {
                                 val previewUrl = client.getPreviewUrl(item) ?: item.uriString
                                 val request = ImageRequest.Builder(context)
                                     .data(previewUrl)
+                                    .memoryCachePolicy(coil.request.CachePolicy.DISABLED)
                                     .size(512, 512)
                                     .build()
                                 val result = imageLoader.execute(request)
@@ -752,13 +758,6 @@ object ThumbnailManager {
                             MediaType.VIDEO -> {
                                 val thumb = getVideoThumbnail(context.cacheDir, file)
                                 if (thumb != null && thumb.exists()) {
-                                    if (imageLoader != null) {
-                                        val request = ImageRequest.Builder(context)
-                                            .data(thumb)
-                                            .size(512, 512)
-                                            .build()
-                                        imageLoader.execute(request)
-                                    }
                                     withContext(Dispatchers.Main) {
                                         onThumbnailGenerated?.invoke(item)
                                     }
@@ -767,13 +766,6 @@ object ThumbnailManager {
                             MediaType.CBZ -> {
                                 val cover = getCbzCoverThumbnail(context.cacheDir, file)
                                 if (cover != null && cover.exists()) {
-                                    if (imageLoader != null) {
-                                        val request = ImageRequest.Builder(context)
-                                            .data(cover)
-                                            .size(512, 512)
-                                            .build()
-                                        imageLoader.execute(request)
-                                    }
                                     withContext(Dispatchers.Main) {
                                         onThumbnailGenerated?.invoke(item)
                                     }
@@ -782,13 +774,6 @@ object ThumbnailManager {
                             MediaType.DOCUMENT, MediaType.EBOOK, MediaType.PRESENTATION -> {
                                 val cover = DocumentPageReader.getDocumentCover(context.cacheDir, file)
                                 if (cover != null && cover.exists()) {
-                                    if (imageLoader != null) {
-                                        val request = ImageRequest.Builder(context)
-                                            .data(cover)
-                                            .size(512, 512)
-                                            .build()
-                                        imageLoader.execute(request)
-                                    }
                                     withContext(Dispatchers.Main) {
                                         onThumbnailGenerated?.invoke(item)
                                     }
@@ -797,26 +782,12 @@ object ThumbnailManager {
                             MediaType.AUDIO -> {
                                 val meta = AudioMetadataHelper.extractMetadata(context, file)
                                 if (meta.artworkFile != null && meta.artworkFile.exists()) {
-                                    if (imageLoader != null) {
-                                        val request = ImageRequest.Builder(context)
-                                            .data(meta.artworkFile)
-                                            .size(512, 512)
-                                            .build()
-                                        imageLoader.execute(request)
-                                    }
                                     withContext(Dispatchers.Main) {
                                         onThumbnailGenerated?.invoke(item)
                                     }
                                 }
                             }
                             MediaType.IMAGE, MediaType.GIF -> {
-                                if (imageLoader != null) {
-                                    val request = ImageRequest.Builder(context)
-                                        .data(file)
-                                        .size(512, 512)
-                                        .build()
-                                    imageLoader.execute(request)
-                                }
                                 withContext(Dispatchers.Main) {
                                     onThumbnailGenerated?.invoke(item)
                                 }

@@ -49,6 +49,10 @@ class DrawerFileListAdapter(
     }
 
     inner class DrawerViewHolder(private val binding: ItemDrawerFileBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun clear() {
+            binding.ivDrawerThumb.setImageDrawable(null)
+        }
+
         fun bind(item: MediaItem, position: Int) {
             binding.tvDrawerFileName.text = item.name
 
@@ -257,6 +261,11 @@ class DrawerFileListAdapter(
 
     override fun onBindViewHolder(holder: DrawerViewHolder, position: Int) {
         holder.bind(items[position], position)
+    }
+
+    override fun onViewRecycled(holder: DrawerViewHolder) {
+        super.onViewRecycled(holder)
+        holder.clear()
     }
 
     override fun getItemCount(): Int = items.size

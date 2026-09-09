@@ -640,5 +640,8 @@ class MediaViewerActivity : AppCompatActivity() {
         super.onDestroy()
         drawerLoadingJob?.cancel()
         drawerLoadingJob = null
+        if (::adapter.isInitialized) {
+            adapter.release()
+        }
     }
 }

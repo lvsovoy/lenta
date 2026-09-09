@@ -51,6 +51,7 @@ class CbzPageAdapter(
             binding.ivComicPage.scaleY = 1f
             binding.ivComicPage.translationX = 0f
             binding.ivComicPage.translationY = 0f
+            binding.ivComicPage.setImageDrawable(null)
         }
     }
 

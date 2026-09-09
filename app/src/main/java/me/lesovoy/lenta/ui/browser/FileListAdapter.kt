@@ -32,6 +32,10 @@ class FileListAdapter(
     fun getItems(): List<MediaItem> = items
 
     inner class FileViewHolder(private val binding: ItemFileGridBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun clear() {
+            binding.ivThumbnail.setImageDrawable(null)
+        }
+
         fun bind(item: MediaItem) {
             binding.tvFileName.text = item.name
 
@@ -248,6 +252,11 @@ class FileListAdapter(
 
     override fun onBindViewHolder(holder: FileViewHolder, position: Int) {
         holder.bind(items[position])
+    }
+
+    override fun onViewRecycled(holder: FileViewHolder) {
+        super.onViewRecycled(holder)
+        holder.clear()
     }
 
     override fun getItemCount(): Int = items.size

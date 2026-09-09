@@ -137,6 +137,7 @@ class MediaViewerAdapter(
         if (pos != RecyclerView.NO_POSITION) {
             activeHolders.remove(pos)
         }
+        activeHolders.values.remove(holder)
         if (holder is BaseMediaViewHolder) {
             holder.onInactive()
             holder.cleanup()
@@ -159,6 +160,14 @@ class MediaViewerAdapter(
     fun setAllMuted(muted: Boolean) {
         currentMuted = muted
         activeHolders.values.forEach { it.setMuted(muted) }
+    }
+
+    fun release() {
+        activeHolders.values.forEach {
+            it.onInactive()
+            it.cleanup()
+        }
+        activeHolders.clear()
     }
 
     // ==========================================
@@ -275,8 +284,13 @@ class MediaViewerAdapter(
             binding.videoTouchOverlay.setOnTouchListener(pinchListener)
             binding.root.setOnTouchListener(pinchListener)
 
-            initPlayer()
+            if (isActive) {
+                initPlayer()
+                loadMedia(item)
+            }
+        }
 
+        private fun loadMedia(item: MediaItem) {
             job?.cancel()
             job = scope.launch {
                 binding.progressVideoBuffering.visibility = View.VISIBLE
@@ -387,17 +401,21 @@ class MediaViewerAdapter(
         override fun onActive() {
             isActive = true
             initPlayer()
-            player?.let { p ->
-                if (!isManuallyPaused) {
-                    p.playWhenReady = true
-                    p.play()
-                }
-                val dur = p.duration
-                val pos = bindingAdapterPosition
-                if (dur > 0 && pos != RecyclerView.NO_POSITION) {
-                    val current = p.currentPosition.coerceIn(0L, dur)
-                    val fraction = (current.toFloat() / dur.toFloat()).coerceIn(0f, 1f)
-                    onPlaybackProgress(pos, current, dur, fraction, p.isPlaying)
+            if (player?.currentMediaItem == null && currentItem != null) {
+                loadMedia(currentItem!!)
+            } else {
+                player?.let { p ->
+                    if (!isManuallyPaused) {
+                        p.playWhenReady = true
+                        p.play()
+                    }
+                    val dur = p.duration
+                    val pos = bindingAdapterPosition
+                    if (dur > 0 && pos != RecyclerView.NO_POSITION) {
+                        val current = p.currentPosition.coerceIn(0L, dur)
+                        val fraction = (current.toFloat() / dur.toFloat()).coerceIn(0f, 1f)
+                        onPlaybackProgress(pos, current, dur, fraction, p.isPlaying)
+                    }
                 }
             }
             startProgressUpdates()
@@ -406,13 +424,17 @@ class MediaViewerAdapter(
         override fun onInactive() {
             isActive = false
             progressJob?.cancel()
-            player?.playWhenReady = false
-            player?.pause()
+            job?.cancel()
             binding.playerView.animate().cancel()
             binding.playerView.scaleX = 1f
             binding.playerView.scaleY = 1f
             binding.playerView.translationX = 0f
             binding.playerView.translationY = 0f
+            player?.stop()
+            player?.release()
+            player = null
+            binding.playerView.player = null
+            binding.progressVideoBuffering.visibility = View.GONE
         }
 
         override fun togglePlayPause(): Boolean {
@@ -477,9 +499,11 @@ class MediaViewerAdapter(
             binding.playerView.scaleY = 1f
             binding.playerView.translationX = 0f
             binding.playerView.translationY = 0f
+            player?.stop()
             player?.release()
             player = null
             binding.playerView.player = null
+            binding.progressVideoBuffering.visibility = View.GONE
         }
     }
 
@@ -816,10 +840,12 @@ class MediaViewerAdapter(
         private var exoPlayer: ExoPlayer? = null
         private var progressJob: Job? = null
         private var metadataJob: Job? = null
+        private var currentItem: MediaItem? = null
         private var isPlayerReady = false
         private var isPaused = false
 
         override fun bind(item: MediaItem, position: Int) {
+            currentItem = item
             isActive = (position == activePosition)
             binding.progressLoading.visibility = View.VISIBLE
             binding.waveformView.setWaveformSeed(item.name)
@@ -912,7 +938,9 @@ class MediaViewerAdapter(
             }
 
             // Setup ExoPlayer
-            setupPlayer(item)
+            if (isActive) {
+                setupPlayer(item)
+            }
         }
 
         private fun setupPlayer(item: MediaItem) {
@@ -1022,7 +1050,9 @@ class MediaViewerAdapter(
 
         override fun onActive() {
             isActive = true
-            if (!isPaused && isPlayerReady) {
+            if (exoPlayer == null && currentItem != null) {
+                setupPlayer(currentItem!!)
+            } else if (!isPaused && isPlayerReady) {
                 exoPlayer?.play()
             }
             startProgressUpdates()
@@ -1033,6 +1063,7 @@ class MediaViewerAdapter(
             progressJob?.cancel()
             exoPlayer?.pause()
             binding.waveformView.setPlaying(false)
+            cleanupPlayer()
         }
 
         override fun togglePlayPause(): Boolean {

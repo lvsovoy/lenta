@@ -86,7 +86,7 @@ class LentaApp : Application(), ImageLoaderFactory {
             }
             .memoryCache {
                 MemoryCache.Builder(this)
-                    .maxSizePercent(0.25)
+                    .maxSizePercent(0.20)
                     .build()
             }
             .diskCache {
@@ -95,6 +95,7 @@ class LentaApp : Application(), ImageLoaderFactory {
                     .maxSizeBytes(200L * 1024 * 1024) // 200 MB
                     .build()
             }
+            .allowRgb565(true)
             .respectCacheHeaders(false)
             .build()
     }
