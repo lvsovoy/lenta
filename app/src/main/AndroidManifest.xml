@@ -18,6 +18,19 @@
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
 
+    <attribution
+        android:tag="media_playback"
+        android:label="@string/app_name" />
+    <attribution
+        android:tag="storage"
+        android:label="@string/pref_category_storage" />
+    <attribution
+        android:tag="camera"
+        android:label="@string/scan_qr_code" />
+    <attribution
+        android:tag="nextcloud"
+        android:label="@string/nav_nextcloud" />
+
     <application
         android:name=".LentaApp"
         android:allowBackup="true"
@@ -143,8 +156,8 @@
                 <data android:mimeType="application/msword" />
                 <data android:mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
                 <data android:mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.template" />
-                <data android:mimeType="application/vnd.ms-word.document.macroEnabled.12" />
-                <data android:mimeType="application/vnd.ms-word.template.macroEnabled.12" />
+                <data android:mimeType="application/vnd.ms-word.document.macroenabled.12" />
+                <data android:mimeType="application/vnd.ms-word.template.macroenabled.12" />
                 <data android:mimeType="application/vnd.oasis.opendocument.text" />
                 <data android:mimeType="application/vnd.oasis.opendocument.text-template" />
                 <data android:mimeType="application/rtf" />
@@ -175,7 +188,7 @@
                 <data android:mimeType="application/vnd.openxmlformats-officedocument.presentationml.presentation" />
                 <data android:mimeType="application/vnd.openxmlformats-officedocument.presentationml.slideshow" />
                 <data android:mimeType="application/vnd.openxmlformats-officedocument.presentationml.template" />
-                <data android:mimeType="application/vnd.ms-powerpoint.presentation.macroEnabled.12" />
+                <data android:mimeType="application/vnd.ms-powerpoint.presentation.macroenabled.12" />
                 <data android:mimeType="application/vnd.oasis.opendocument.presentation" />
                 <data android:mimeType="application/vnd.oasis.opendocument.presentation-template" />
                 <data android:mimeType="application/vnd.apple.keynote" />

@@ -6,11 +6,6 @@
     <string name="nav_nextcloud">Nextcloud</string>
     <string name="nav_settings">Settings</string>
 
-    <string name="menu_files">Files</string>
-    <string name="menu_local">Local Files</string>
-    <string name="menu_nextcloud">Nextcloud</string>
-    <string name="menu_settings">Settings</string>
-
     <string name="sources_header_title">Sources</string>
     <string name="sources_header_subtitle">Local device and connected cloud accounts</string>
     <string name="source_local_title">Local Storage</string>
@@ -30,8 +25,6 @@
 
     <string name="pref_sources">Sources</string>
     <string name="pref_sources_summary">Configure storage backends and cloud services</string>
-    <string name="pref_category_sources">Sources</string>
-    <string name="pref_category_sources_summary">Configure storage backends and cloud accounts</string>
     <string name="pref_category_browsing">Browsing &amp; Playback</string>
     <string name="pref_category_browsing_summary">File visibility and media playback preferences</string>
     <string name="pref_category_storage">Storage &amp; Cache</string>
@@ -99,7 +92,4 @@
     <string name="nav_header_title">Lenta Media Viewer</string>
     <string name="nav_header_subtitle">Local &amp; Nextcloud Media</string>
     <string name="nav_header_desc">Navigation header</string>
-    <string name="fab_content_description">Action</string>
-    <string name="action_settings">Settings</string>
-    <string name="image_view_item_transform_content_description">Media image</string>
 </resources>
