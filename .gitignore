@@ -1,15 +1,73 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# Built application and bundle packages
+*.apk
+*.aar
+*.ap_
+*.aab
+
+# Java/Kotlin class and bytecode files
+*.class
+*.dex
+
+# Build folders and intermediate caches
+build/
+**/build/
+.gradle/
+bin/
+gen/
+out/
+
+# Local configuration files
 local.properties
+gradle-app.setting
+
+# Kotlin artifacts
+.kotlin/
+kotlin-js-store/
+
+# Android Studio & IntelliJ IDEA files
+*.iml
+*.ipr
+*.iws
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+.idea/shelf/
+.idea/deploymentTargetSelector.xml
+.idea/render.experimental.xml
+.idea/gradle.local.xml
+
+# Keystore and signing files
+*.jks
+*.keystore
+!debug.keystore
+signing.properties
+private.properties
+
+# External Native (C/C++) builds
+.externalNativeBuild/
+.cxx/
+
+# Profiling, heap dumps, and captures
+/captures/
+*.hprof
+*.prof
+hs_err_pid*
+replay_pid*
+
+# Log files
+*.log
+
+# Proguard outputs
+proguard/
+
+# OS-generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

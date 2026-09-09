@@ -10,7 +10,13 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import me.lesovoy.lenta.data.nextcloud.NextcloudPreferences
+import me.lesovoy.lenta.data.update.AppUpdateManager
+import me.lesovoy.lenta.data.update.UpdateCheckResult
 import me.lesovoy.lenta.databinding.ActivityMainBinding
+import me.lesovoy.lenta.ui.update.UpdateDialogHelper
 import me.lesovoy.lenta.ui.viewer.MediaViewerActivity
 
 class MainActivity : AppCompatActivity() {
@@ -68,6 +74,21 @@ class MainActivity : AppCompatActivity() {
                 drawerBackCallback.isEnabled = slideOffset > 0.05f
             }
         })
+
+        checkAppUpdatesOnStartup()
+    }
+
+    private fun checkAppUpdatesOnStartup() {
+        val prefs = NextcloudPreferences(this)
+        if (!prefs.checkUpdatesOnStartup) return
+
+        lifecycleScope.launch {
+            val updateManager = AppUpdateManager(this@MainActivity)
+            val result = updateManager.checkForUpdates()
+            if (result is UpdateCheckResult.UpdateAvailable && !isFinishing && !isDestroyed) {
+                UpdateDialogHelper.showUpdateDialog(this@MainActivity, result.releaseInfo)
+            }
+        }
     }
 
     fun openDrawer() {

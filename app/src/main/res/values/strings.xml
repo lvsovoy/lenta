@@ -31,6 +31,23 @@
     <string name="pref_category_storage_summary">Manage cached media thumbnails and disk storage</string>
     <string name="pref_category_appearance">Appearance</string>
     <string name="pref_category_appearance_summary">Theme preferences and dynamic color palettes</string>
+    <string name="pref_category_updates">App Updates</string>
+    <string name="pref_category_updates_summary">Check for new releases and install app updates</string>
+    <string name="pref_check_updates_startup">Check for updates on startup</string>
+    <string name="pref_check_updates_startup_summary">Automatically check for new releases when Lenta opens</string>
+    <string name="pref_current_version">Current version: %1$s</string>
+    <string name="check_for_updates">Check for Updates</string>
+    <string name="checking_for_updates">Checking for updates…</string>
+    <string name="update_available_title">New Version Available: %1$s</string>
+    <string name="update_available_message">A new version (%1$s) of Lenta is available with the latest improvements and fixes.</string>
+    <string name="update_up_to_date">Lenta is up to date (%1$s)</string>
+    <string name="update_check_failed">Failed to check for updates: %1$s</string>
+    <string name="update_download_button">Download Update</string>
+    <string name="update_dismiss_button">Later</string>
+    <string name="update_view_release">View on GitHub</string>
+    <string name="update_changelog_header">What\'s New:</string>
+    <string name="update_commits_header">Included Commits:</string>
+    <string name="update_downloading">Starting download of %1$s…</string>
 
     <string name="storage_internal">Internal Storage</string>
     <string name="storage_pictures">Pictures</string>

@@ -16,10 +16,13 @@ import me.lesovoy.lenta.data.source.StorageSource
 import me.lesovoy.lenta.data.source.StorageSourceManager
 import me.lesovoy.lenta.data.source.StorageSourceType
 import me.lesovoy.lenta.data.thumbnail.ThumbnailManager
+import me.lesovoy.lenta.data.update.AppUpdateManager
+import me.lesovoy.lenta.data.update.UpdateCheckResult
 import me.lesovoy.lenta.databinding.FragmentSettingsBinding
 import me.lesovoy.lenta.databinding.ItemSourceCardBinding
 import me.lesovoy.lenta.ui.scanner.QrScannerActivity
 import me.lesovoy.lenta.ui.sources.SourceEditDialog
+import me.lesovoy.lenta.ui.update.UpdateDialogHelper
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.journeyapps.barcodescanner.ScanContract
@@ -33,6 +36,7 @@ class SettingsFragment : Fragment() {
     private lateinit var preferences: NextcloudPreferences
     private lateinit var sourceManager: StorageSourceManager
     private lateinit var client: NextcloudClient
+    private lateinit var updateManager: AppUpdateManager
 
     private val qrScannerLauncher = registerForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
@@ -54,6 +58,7 @@ class SettingsFragment : Fragment() {
         preferences = NextcloudPreferences(requireContext())
         sourceManager = StorageSourceManager(requireContext())
         client = NextcloudClient(preferences)
+        updateManager = AppUpdateManager(requireContext())
 
         loadCurrentSettings()
         setupListeners()
@@ -68,6 +73,8 @@ class SettingsFragment : Fragment() {
         binding.switchShowHiddenFiles.isChecked = preferences.showHiddenFiles
         binding.switchMuteByDefault.isChecked = preferences.muteByDefault
         binding.switchLoopVideo.isChecked = preferences.loopVideo
+        binding.switchCheckUpdatesStartup.isChecked = preferences.checkUpdatesOnStartup
+        binding.tvCurrentVersion.text = getString(R.string.pref_current_version, updateManager.currentVersion)
 
         updateCacheSizeDisplay()
     }
@@ -190,6 +197,14 @@ class SettingsFragment : Fragment() {
             preferences.loopVideo = isChecked
         }
 
+        binding.switchCheckUpdatesStartup.setOnCheckedChangeListener { _, isChecked ->
+            preferences.checkUpdatesOnStartup = isChecked
+        }
+
+        binding.btnCheckUpdates.setOnClickListener {
+            checkAppUpdatesManual()
+        }
+
         binding.btnClearCache.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
                 ThumbnailManager.clearThumbnailCache(requireContext())
@@ -268,6 +283,36 @@ class SettingsFragment : Fragment() {
                 val error = result.exceptionOrNull()?.message ?: "Unknown error"
                 binding.tvConnectionStatus.text = getString(R.string.nextcloud_connection_failed, error)
                 binding.tvConnectionStatus.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.holo_red_dark))
+            }
+        }
+    }
+
+    private fun checkAppUpdatesManual() {
+        binding.tvUpdateStatus.visibility = View.VISIBLE
+        binding.tvUpdateStatus.text = getString(R.string.checking_for_updates)
+        binding.tvUpdateStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.teal_700))
+        binding.btnCheckUpdates.isEnabled = false
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val result = updateManager.checkForUpdates()
+            binding.btnCheckUpdates.isEnabled = true
+
+            when (result) {
+                is UpdateCheckResult.UpdateAvailable -> {
+                    binding.tvUpdateStatus.text = getString(R.string.update_available_title, result.releaseInfo.tagName)
+                    binding.tvUpdateStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.teal_700))
+                    UpdateDialogHelper.showUpdateDialog(requireActivity(), result.releaseInfo)
+                }
+                is UpdateCheckResult.UpToDate -> {
+                    binding.tvUpdateStatus.text = getString(R.string.update_up_to_date, result.currentVersion)
+                    binding.tvUpdateStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.teal_700))
+                    Snackbar.make(binding.root, getString(R.string.update_up_to_date, result.currentVersion), Snackbar.LENGTH_SHORT).show()
+                }
+                is UpdateCheckResult.Error -> {
+                    binding.tvUpdateStatus.text = getString(R.string.update_check_failed, result.message)
+                    binding.tvUpdateStatus.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.holo_red_dark))
+                    Snackbar.make(binding.root, getString(R.string.update_check_failed, result.message), Snackbar.LENGTH_LONG).show()
+                }
             }
         }
     }

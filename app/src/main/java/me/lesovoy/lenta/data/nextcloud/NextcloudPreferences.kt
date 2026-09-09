@@ -15,6 +15,8 @@ open class NextcloudPreferences(
     private var memoryMuteByDefault: Boolean = true
     private var memoryLoopVideo: Boolean = true
     private var memoryShowHiddenFiles: Boolean = false
+    private var memoryCheckUpdatesStartup: Boolean = true
+    private var memoryLastUpdateCheckTimestamp: Long = 0L
 
     companion object {
         private const val KEY_SERVER_URL = "nc_server_url"
@@ -23,6 +25,8 @@ open class NextcloudPreferences(
         private const val KEY_MUTE_DEFAULT = "pref_mute_default"
         private const val KEY_LOOP_VIDEO = "pref_loop_video"
         private const val KEY_SHOW_HIDDEN_FILES = "pref_show_hidden_files"
+        private const val KEY_CHECK_UPDATES_STARTUP = "pref_check_updates_startup"
+        private const val KEY_LAST_UPDATE_CHECK = "pref_last_update_check"
     }
 
     var serverUrl: String
@@ -67,6 +71,20 @@ open class NextcloudPreferences(
         set(value) {
             memoryShowHiddenFiles = value
             prefs?.edit()?.putBoolean(KEY_SHOW_HIDDEN_FILES, value)?.apply()
+        }
+
+    var checkUpdatesOnStartup: Boolean
+        get() = prefs?.getBoolean(KEY_CHECK_UPDATES_STARTUP, true) ?: memoryCheckUpdatesStartup
+        set(value) {
+            memoryCheckUpdatesStartup = value
+            prefs?.edit()?.putBoolean(KEY_CHECK_UPDATES_STARTUP, value)?.apply()
+        }
+
+    var lastUpdateCheckTimestamp: Long
+        get() = prefs?.getLong(KEY_LAST_UPDATE_CHECK, 0L) ?: memoryLastUpdateCheckTimestamp
+        set(value) {
+            memoryLastUpdateCheckTimestamp = value
+            prefs?.edit()?.putLong(KEY_LAST_UPDATE_CHECK, value)?.apply()
         }
 
     fun isConfigured(): Boolean {
