@@ -17,6 +17,7 @@ Lenta is a fast, open-source media viewer and cloud storage browser for Android.
 - **[Website & Landing Page](https://lvsovoy.github.io/lenta/)** (`https://lvsovoy.github.io/lenta/`)
 - **[Privacy Policy (HTML)](https://lvsovoy.github.io/lenta/privacy.html)** / **[Markdown Source](PRIVACY_POLICY.md)**
 - **[Terms of Service (HTML)](https://lvsovoy.github.io/lenta/terms.html)** / **[Markdown Source](TERMS_OF_SERVICE.md)**
+- **[Microsoft Identity Association](https://lvsovoy.github.io/lenta/.well-known/microsoft-identity-association.json)**
 - **[License (CC BY-NC-SA 4.0)](LICENSE)**
 
 ---

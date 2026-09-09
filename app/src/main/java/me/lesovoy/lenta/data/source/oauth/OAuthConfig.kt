@@ -57,7 +57,7 @@ object OAuthConfig {
      * Default Microsoft OneDrive OAuth2 Developer Configuration.
      */
     val DEFAULT_ONEDRIVE = OAuthProviderConfig(
-        clientId = "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+        clientId = "169ecc20-4c23-45e2-89d6-c71a539f86fd",
         redirectUri = "me.lesovoy.lenta://oauth2callback",
         scopes = "Files.Read Files.Read.All User.Read offline_access openid profile email",
         authEndpoint = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",

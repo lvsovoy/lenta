@@ -502,7 +502,7 @@ class StorageSourcesUnitTests {
         assertEquals("https://www.googleapis.com/oauth2/v3/userinfo", OAuthConfig.DEFAULT_GOOGLE.userInfoEndpoint)
         assertEquals("https://www.googleapis.com/drive/v3", OAuthConfig.DEFAULT_GOOGLE.apiBaseUrl)
 
-        assertEquals("d3590ed6-52b3-4102-aeff-aad2292ab01c", OAuthConfig.DEFAULT_ONEDRIVE.clientId)
+        assertEquals("169ecc20-4c23-45e2-89d6-c71a539f86fd", OAuthConfig.DEFAULT_ONEDRIVE.clientId)
         assertEquals("me.lesovoy.lenta://oauth2callback", OAuthConfig.DEFAULT_ONEDRIVE.redirectUri)
         assertTrue(OAuthConfig.DEFAULT_ONEDRIVE.scopes.contains("Files.Read"))
         assertEquals("https://login.microsoftonline.com/common/oauth2/v2.0/authorize", OAuthConfig.DEFAULT_ONEDRIVE.authEndpoint)
