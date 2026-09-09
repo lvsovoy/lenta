@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Privacy Policy for Lenta - Android Media Viewer & Cloud File Browser">
+    <meta name="theme-color" content="#1976d2">
+    <title>Privacy Policy - Lenta</title>
+    <style>
+        :root {
+            --md-sys-color-primary: #1976d2;
+            --md-sys-color-on-primary: #ffffff;
+            --md-sys-color-primary-container: #d2e4ff;
+            --md-sys-color-on-primary-container: #001c3b;
+            --md-sys-color-secondary: #535f70;
+            --md-sys-color-on-secondary: #ffffff;
+            --md-sys-color-secondary-container: #d7e3f8;
+            --md-sys-color-on-secondary-container: #101c2b;
+            --md-sys-color-surface: #fdfcff;
+            --md-sys-color-on-surface: #1a1c1e;
+            --md-sys-color-surface-variant: #e0e2ec;
+            --md-sys-color-on-surface-variant: #43474e;
+            --md-sys-color-outline: #73777f;
+            --md-sys-color-outline-variant: #c4c7cf;
+            --md-sys-color-background: #fdfcff;
+            --md-sys-color-on-background: #1a1c1e;
+            --md-sys-color-card: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --radius-sm: 8px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-full: 9999px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --md-sys-color-primary: #9ecaff;
+                --md-sys-color-on-primary: #003258;
+                --md-sys-color-primary-container: #00497d;
+                --md-sys-color-on-primary-container: #d2e4ff;
+                --md-sys-color-secondary: #bbc7db;
+                --md-sys-color-on-secondary: #253140;
+                --md-sys-color-secondary-container: #3c4858;
+                --md-sys-color-on-secondary-container: #d7e3f8;
+                --md-sys-color-surface: #1a1c1e;
+                --md-sys-color-on-surface: #e2e2e6;
+                --md-sys-color-surface-variant: #43474e;
+                --md-sys-color-on-surface-variant: #c4c7cf;
+                --md-sys-color-outline: #8d9199;
+                --md-sys-color-outline-variant: #43474e;
+                --md-sys-color-background: #121316;
+                --md-sys-color-on-background: #e2e2e6;
+                --md-sys-color-card: #1e2023;
+                --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+                --shadow-md: 0 4px 6px rgba(0,0,0,0.4);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        header {
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            position: sticky;
+            top: 0;
+            background: var(--md-sys-color-background);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--md-sys-color-on-background);
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--md-sys-color-on-surface-variant);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--md-sys-color-primary);
+        }
+
+        .content-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3.5rem 1.5rem 5rem;
+        }
+
+        .doc-header {
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .doc-header h1 {
+            font-size: clamp(2rem, 4vw, 2.75rem);
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        .doc-meta {
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 0.95rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 2.25rem 0 1rem;
+            letter-spacing: -0.01em;
+            color: var(--md-sys-color-primary);
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1.25rem;
+            color: var(--md-sys-color-on-background);
+        }
+
+        ul, ol {
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        blockquote {
+            background: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border-left: 4px solid var(--md-sys-color-primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: var(--radius-sm);
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+
+        blockquote p:last-child {
+            margin-bottom: 0;
+        }
+
+        .highlight-box {
+            background: var(--md-sys-color-card);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        a {
+            color: var(--md-sys-color-primary);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        a:hover {
+            opacity: 0.85;
+        }
+
+        footer {
+            border-top: 1px solid var(--md-sys-color-outline-variant);
+            background: var(--md-sys-color-surface);
+            padding: 2.5rem 1.5rem;
+        }
+
+        .footer-container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            list-style: none;
+        }
+
+        .footer-links a {
+            text-decoration: none;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 0.9rem;
+        }
+
+        .footer-links a:hover {
+            color: var(--md-sys-color-primary);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="nav-container">
+            <a href="index.html" class="brand">
+                <div class="brand-icon">L</div>
+                <span>Lenta</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="privacy.html" style="color: var(--md-sys-color-primary); font-weight: 700;">Privacy</a></li>
+                <li><a href="terms.html">Terms</a></li>
+                <li><a href="https://github.com/lvsovoy/lenta" target="_blank" rel="noopener">GitHub</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="content-container">
+        <div class="doc-header">
+            <h1>Privacy Policy for Lenta</h1>
+            <div class="doc-meta"><strong>Last updated:</strong> September 9, 2026</div>
+        </div>
+
+        <p>Lenta ("we", "our", or "the application") is a free, open-source media viewer and file management application for Android. We are committed to protecting your privacy and ensuring you maintain full control over your personal files and data.</p>
+
+        <p>This Privacy Policy explains how Lenta handles your information when you use the app, including when connecting third-party cloud storage services such as <strong>Google Drive</strong>, <strong>Microsoft OneDrive</strong>, and <strong>Nextcloud</strong>.</p>
+
+        <h2>1. Summary: Privacy by Design & Local Processing</h2>
+        <div class="highlight-box">
+            <ul>
+                <li><strong>No Developer Servers:</strong> Lenta is a client-only Android application. We do not operate any backend servers, analytics services, telemetry trackers, or user databases.</li>
+                <li><strong>No Data Collection or Selling:</strong> We do not collect, track, store, sell, or share your personal information, browsing history, or media files.</li>
+                <li><strong>Direct Encrypted Communication:</strong> When connecting to cloud storage providers (Google Drive, Microsoft OneDrive, Nextcloud), Lenta communicates directly and securely with the official API endpoints of those providers over encrypted HTTPS connections.</li>
+            </ul>
+        </div>
+
+        <h2>2. Information Accessed and Handled by Lenta</h2>
+
+        <h3>A. Local Storage & Device Files</h3>
+        <ul>
+            <li><strong>Permissions:</strong> Storage access permissions (<code>READ_MEDIA_IMAGES</code>, <code>READ_MEDIA_VIDEO</code>, <code>READ_MEDIA_AUDIO</code>).</li>
+            <li><strong>Usage:</strong> Used solely to discover, display, and play local media files and generate fast thumbnail previews on your device.</li>
+        </ul>
+
+        <h3>B. Google Drive (Google OAuth 2.0)</h3>
+        <p>When you choose to connect Google Drive, Lenta requests access via Google OAuth 2.0 with the following scopes:</p>
+        <ul>
+            <li><code>.../auth/drive.readonly</code> or <code>.../auth/drive.file</code>: To list your Drive folders, download requested media files for local playback, and generate preview thumbnails.</li>
+            <li><code>.../auth/userinfo.email</code> and <code>.../auth/userinfo.profile</code>: To retrieve and display your account name and email address as a label in the storage sources list.</li>
+        </ul>
+
+        <blockquote>
+            <p><strong>Google API Services User Data Policy & Limited Use Disclosure:</strong></p>
+            <p><strong>Lenta's use and transfer to any other app of information received from Google APIs will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Google API Services User Data Policy</a>, including the Limited Use requirements.</strong></p>
+            <p>Specifically:</p>
+            <ul>
+                <li>Data received from Google APIs is used strictly to provide user-facing media browsing and playback features within Lenta.</li>
+                <li>Data received from Google APIs is never transferred, shared, or disclosed to third parties, advertising platforms, data brokers, or external servers.</li>
+                <li>Data received from Google APIs is never used for serving advertisements, retargeting, or training machine learning / artificial intelligence models.</li>
+            </ul>
+        </blockquote>
+
+        <h3>C. Microsoft OneDrive (Microsoft Entra / Microsoft Graph)</h3>
+        <p>When you connect Microsoft OneDrive, Lenta requests the following delegated permissions:</p>
+        <ul>
+            <li><code>Files.Read</code> / <code>Files.Read.All</code>: To browse folders, stream audio/video, and render document/comic pages.</li>
+            <li><code>User.Read</code>, <code>email</code>, <code>profile</code>: To display your account name in Lenta.</li>
+            <li><code>offline_access</code>: To maintain secure session authentication without requiring repeated interactive logins.</li>
+        </ul>
+        <p>All OneDrive data is processed entirely on-device and is never shared with third parties.</p>
+
+        <h2>3. Data Storage, Security & Token Management</h2>
+        <ul>
+            <li><strong>Local Credentials:</strong> OAuth access tokens, refresh tokens, and server credentials are saved exclusively in your device's private, sandboxed application storage.</li>
+            <li><strong>Local Caching:</strong> Thumbnail images and downloaded media files are stored in your device's private app cache directory (<code>context.cacheDir</code>).</li>
+            <li><strong>Encryption:</strong> All network communications with Google, Microsoft, and Nextcloud servers use Transport Layer Security (TLS/HTTPS).</li>
+        </ul>
+
+        <h2>4. Data Retention, Cache Management & Deletion</h2>
+        <ul>
+            <li><strong>Removing a Storage Source:</strong> You can disconnect Google Drive or OneDrive at any time by deleting the storage source in Lenta. Deleting a source immediately and permanently deletes the associated OAuth tokens and account metadata from your device.</li>
+            <li><strong>Clearing Cache:</strong> You can purge locally cached thumbnails and downloaded online media files at any time via <strong>Settings &gt; Storage &amp; Cache &gt; Clear Cache</strong>.</li>
+            <li><strong>Uninstalling Lenta:</strong> Uninstalling the app removes all locally stored tokens, cache files, and preferences completely.</li>
+        </ul>
+
+        <h2>5. How to Revoke Access</h2>
+        <p>You can revoke Lenta's access to your cloud accounts at any time through the provider security dashboards:</p>
+        <ul>
+            <li><strong>Google:</strong> <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">Google Account Permissions Dashboard</a></li>
+            <li><strong>Microsoft:</strong> <a href="https://account.live.com/consent/Manage" target="_blank" rel="noopener">Microsoft Account Consent Management</a></li>
+        </ul>
+
+        <h2>6. Third-Party Services</h2>
+        <p>Lenta connects with external cloud storage services at your explicit request. Use of these third-party services is subject to their respective privacy policies:</p>
+        <ul>
+            <li><a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a></li>
+            <li><a href="https://privacy.microsoft.com/privacystatement" target="_blank" rel="noopener">Microsoft Privacy Statement</a></li>
+        </ul>
+
+        <h2>7. Changes to This Privacy Policy</h2>
+        <p>We may update this Privacy Policy periodically to reflect new features or regulatory requirements. Any updates will be posted directly to this web page and the project repository.</p>
+
+        <h2>8. Contact & Open Source Repository</h2>
+        <p>Lenta is an open-source project hosted on GitHub:</p>
+        <ul>
+            <li><strong>Repository & Issues:</strong> <a href="https://github.com/lvsovoy/lenta" target="_blank" rel="noopener">https://github.com/lvsovoy/lenta</a></li>
+            <li><strong>Developer:</strong> lvsovoy</li>
+        </ul>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <p>Lenta &bull; Licensed under CC BY-NC-SA 4.0</p>
+            <ul class="footer-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="privacy.html">Privacy Policy</a></li>
+                <li><a href="terms.html">Terms of Service</a></li>
+                <li><a href="https://github.com/lvsovoy/lenta" target="_blank" rel="noopener">GitHub</a></li>
+            </ul>
+        </div>
+    </footer>
+</body>
+</html>

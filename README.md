@@ -2,35 +2,58 @@
 
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Android%2013%2B%20%28API%2033%2B%29-green.svg)](app/build.gradle.kts)
-[![Privacy Policy](https://img.shields.io/badge/Privacy%20Policy-View-blue.svg)](PRIVACY_POLICY.md)
-[![Terms of Service](https://img.shields.io/badge/Terms%20of%20Service-View-blue.svg)](TERMS_OF_SERVICE.md)
+[![Website](https://img.shields.io/badge/Website-GitHub%20Pages-blue.svg)](https://lvsovoy.github.io/lenta/)
+[![Privacy Policy](https://img.shields.io/badge/Privacy%20Policy-View-blue.svg)](https://lvsovoy.github.io/lenta/privacy.html)
+[![Terms of Service](https://img.shields.io/badge/Terms%20of%20Service-View-blue.svg)](https://lvsovoy.github.io/lenta/terms.html)
 
 Lenta is a fast, open-source media viewer and cloud storage browser for Android. It is designed with a privacy-first, client-only architecture with full Material 3 dynamic theming.
+
+**Live Website & Hosted Documents:** [https://lvsovoy.github.io/lenta/](https://lvsovoy.github.io/lenta/)
 
 ---
 
 ## Legal & Compliance Documents
 
-- **[Privacy Policy](PRIVACY_POLICY.md)** (Public URL: `https://github.com/lvsovoy/lenta/blob/master/PRIVACY_POLICY.md`)
-- **[Terms of Service](TERMS_OF_SERVICE.md)** (Public URL: `https://github.com/lvsovoy/lenta/blob/master/TERMS_OF_SERVICE.md`)
+- **[Website & Landing Page](https://lvsovoy.github.io/lenta/)** (`https://lvsovoy.github.io/lenta/`)
+- **[Privacy Policy (HTML)](https://lvsovoy.github.io/lenta/privacy.html)** / **[Markdown Source](PRIVACY_POLICY.md)**
+- **[Terms of Service (HTML)](https://lvsovoy.github.io/lenta/terms.html)** / **[Markdown Source](TERMS_OF_SERVICE.md)**
 - **[License (CC BY-NC-SA 4.0)](LICENSE)**
 
 ---
 
 ## OAuth Developer Console Setup & URL Mapping
 
-When setting up custom developer applications for **Google Drive** and **Microsoft OneDrive** in the developer portals, use the following standardized field mappings:
+When setting up custom developer applications for **Google Drive** and **Microsoft OneDrive** in developer portals, use the following standardized field mappings:
 
 ### Developer Console Field Mapping
 
 | Field | Google Cloud Console | Microsoft Entra Admin Center | Value to Enter |
 | :--- | :--- | :--- | :--- |
 | **Application Name** | App name | Name | `Lenta` |
-| **App Homepage URL** | Application home page | Home page URL | `https://github.com/lvsovoy/lenta` |
-| **Privacy Policy URL** | Application privacy policy link | Privacy statement URL | `https://github.com/lvsovoy/lenta/blob/master/PRIVACY_POLICY.md` |
-| **Terms of Service URL** | Application terms of service link | Terms of service URL | `https://github.com/lvsovoy/lenta/blob/master/TERMS_OF_SERVICE.md` |
+| **App Homepage URL** | Application home page | Home page URL | `https://lvsovoy.github.io/lenta/` |
+| **Privacy Policy URL** | Application privacy policy link | Privacy statement URL | `https://lvsovoy.github.io/lenta/privacy.html` |
+| **Terms of Service URL** | Application terms of service link | Terms of service URL | `https://lvsovoy.github.io/lenta/terms.html` |
 | **Support Email** | User support email | Support contact | Developer contact email |
-| **Authorized Domains** | Authorized domains | Domain publisher | `github.com` / `github.io` |
+| **Authorized Domains** | Authorized domains | Domain publisher | `github.io` |
+
+---
+
+### GitHub Pages & Google Search Console Verification
+
+To verify ownership of the GitHub Pages domain (`https://lvsovoy.github.io/lenta/`) for Google OAuth Consent Screen verification:
+
+1. **Enable GitHub Pages:**
+   - In the repository, go to **Settings > Pages**.
+   - Under **Build and deployment > Source**, select **Deploy from a branch**.
+   - Set Branch: `master`, Folder: `/ (root)`, and click **Save**.
+2. **Verify in Google Search Console:**
+   - Open [Google Search Console](https://search.google.com/search-console).
+   - Click **Add Property** > Choose **URL prefix** > Enter `https://lvsovoy.github.io/lenta/` (or `https://lvsovoy.github.io/`).
+   - Select the **HTML tag** method. The verification tag `<meta name="google-site-verification" content="ZtHjuldc7rMnnBgxdYXIUR3T93fmiuFQ7Y9afFkG1KY" />` is already embedded in `index.html`.
+   - Click **Verify**.
+3. **Configure Google Cloud OAuth Authorized Domains:**
+   - In Google Cloud Console > **APIs & Services > OAuth consent screen**, add `github.io` to **Authorized domains**.
+   - Enter `https://lvsovoy.github.io/lenta/` as the Home page, `https://lvsovoy.github.io/lenta/privacy.html` as the Privacy Policy, and `https://lvsovoy.github.io/lenta/terms.html` as the Terms of Service.
 
 ---
 
