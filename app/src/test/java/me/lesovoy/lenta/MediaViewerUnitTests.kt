@@ -586,4 +586,60 @@ class MediaViewerUnitTests {
         assertEquals(2, updatedIndices.size)
         assertEquals(0, updatedIndices[1])
     }
+
+    @Test
+    fun testToggleOrientationFromPortraitToLandscape() {
+        val (targetOrientation, isLandscape) = me.lesovoy.lenta.ui.viewer.MediaViewerActivity.determineNextOrientation(
+            android.content.res.Configuration.ORIENTATION_PORTRAIT,
+            currentIsLandscape = false
+        )
+        assertEquals(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, targetOrientation)
+        assertTrue(isLandscape)
+    }
+
+    @Test
+    fun testToggleOrientationFromLandscapeToPortrait() {
+        val (targetOrientation, isLandscape) = me.lesovoy.lenta.ui.viewer.MediaViewerActivity.determineNextOrientation(
+            android.content.res.Configuration.ORIENTATION_LANDSCAPE,
+            currentIsLandscape = true
+        )
+        assertEquals(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, targetOrientation)
+        assertFalse(isLandscape)
+    }
+
+    @Test
+    fun testToggleOrientationOnTabletStartingInLandscape() {
+        // On tablet initially in landscape, first press toggles to portrait
+        val (firstTarget, firstIsLandscape) = me.lesovoy.lenta.ui.viewer.MediaViewerActivity.determineNextOrientation(
+            android.content.res.Configuration.ORIENTATION_LANDSCAPE,
+            currentIsLandscape = false
+        )
+        assertEquals(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, firstTarget)
+        assertFalse(firstIsLandscape)
+
+        // Once rotated to portrait, next press toggles back to landscape
+        val (secondTarget, secondIsLandscape) = me.lesovoy.lenta.ui.viewer.MediaViewerActivity.determineNextOrientation(
+            android.content.res.Configuration.ORIENTATION_PORTRAIT,
+            currentIsLandscape = false
+        )
+        assertEquals(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, secondTarget)
+        assertTrue(secondIsLandscape)
+    }
+
+    @Test
+    fun testToggleOrientationWhenUndefinedUsesFallback() {
+        val (target1, isLandscape1) = me.lesovoy.lenta.ui.viewer.MediaViewerActivity.determineNextOrientation(
+            android.content.res.Configuration.ORIENTATION_UNDEFINED,
+            currentIsLandscape = false
+        )
+        assertEquals(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, target1)
+        assertTrue(isLandscape1)
+
+        val (target2, isLandscape2) = me.lesovoy.lenta.ui.viewer.MediaViewerActivity.determineNextOrientation(
+            android.content.res.Configuration.ORIENTATION_UNDEFINED,
+            currentIsLandscape = true
+        )
+        assertEquals(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, target2)
+        assertFalse(isLandscape2)
+    }
 }

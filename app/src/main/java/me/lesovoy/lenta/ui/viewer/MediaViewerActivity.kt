@@ -47,6 +47,20 @@ class MediaViewerActivity : AppCompatActivity() {
                 putExtra(EXTRA_START_POSITION, startPosition)
             }
         }
+
+        fun determineNextOrientation(currentConfigOrientation: Int, currentIsLandscape: Boolean): Pair<Int, Boolean> {
+            val shouldGoToLandscape = when (currentConfigOrientation) {
+                Configuration.ORIENTATION_PORTRAIT -> true
+                Configuration.ORIENTATION_LANDSCAPE -> false
+                else -> !currentIsLandscape
+            }
+            val targetOrientation = if (shouldGoToLandscape) {
+                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            } else {
+                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            }
+            return Pair(targetOrientation, shouldGoToLandscape)
+        }
     }
 
     private lateinit var binding: ActivityMediaViewerBinding
@@ -72,8 +86,8 @@ class MediaViewerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Set vertical screen orientation by default
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        // Initialize orientation tracking based on current device configuration
+        isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
         // Fullscreen immersive mode
         hideSystemBars()
@@ -410,13 +424,12 @@ class MediaViewerActivity : AppCompatActivity() {
     }
 
     private fun toggleOrientation() {
-        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-            isLandscape = true
-        } else {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-            isLandscape = false
-        }
+        val (targetOrientation, nextIsLandscape) = determineNextOrientation(
+            resources.configuration.orientation,
+            isLandscape
+        )
+        requestedOrientation = targetOrientation
+        isLandscape = nextIsLandscape
         hideSystemBars()
     }
 
@@ -668,6 +681,12 @@ class MediaViewerActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         adapter.getViewHolderAt(currentPosition)?.onInactive()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        isLandscape = (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)
+        hideSystemBars()
     }
 
     override fun onDestroy() {
