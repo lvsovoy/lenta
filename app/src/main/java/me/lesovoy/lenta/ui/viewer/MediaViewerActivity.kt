@@ -29,8 +29,10 @@ import me.lesovoy.lenta.data.nextcloud.NextcloudClient
 import me.lesovoy.lenta.data.nextcloud.NextcloudPreferences
 import me.lesovoy.lenta.data.thumbnail.ThumbnailManager
 import me.lesovoy.lenta.databinding.ActivityMediaViewerBinding
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 class MediaViewerActivity : AppCompatActivity() {
@@ -152,6 +154,14 @@ class MediaViewerActivity : AppCompatActivity() {
             },
             onSwipeRight = {
                 openDrawer()
+            },
+            onThumbnailGenerated = { generatedItem ->
+                if (::drawerAdapter.isInitialized) {
+                    val idx = drawerAdapter.getItems().indexOfFirst { it.id == generatedItem.id }
+                    if (idx != -1) {
+                        drawerAdapter.notifyItemChanged(idx)
+                    }
+                }
             }
         )
 
@@ -170,6 +180,7 @@ class MediaViewerActivity : AppCompatActivity() {
                 if (::drawerAdapter.isInitialized && currentItem != null) {
                     drawerAdapter.setCurrentPlaying(currentItem.id, currentItem.path)
                 }
+                ensureThumbnailForPosition(position)
             }
         })
 
@@ -181,6 +192,29 @@ class MediaViewerActivity : AppCompatActivity() {
 
         // Initial media type UI config
         updateUiForMediaType(mediaList.getOrNull(currentPosition)?.type)
+        ensureThumbnailForPosition(currentPosition)
+    }
+
+    private fun ensureThumbnailForPosition(position: Int) {
+        val item = mediaList.getOrNull(position) ?: return
+        lifecycleScope.launch(Dispatchers.IO) {
+            val client = if (item.sourceId != null) {
+                me.lesovoy.lenta.data.source.SourceClientFactory.getClientForSourceId(this@MediaViewerActivity, item.sourceId) ?: nextcloudClient
+            } else {
+                nextcloudClient
+            }
+            val thumb = ThumbnailManager.generateThumbnail(this@MediaViewerActivity, item, client)
+            if (thumb != null && thumb.exists()) {
+                withContext(Dispatchers.Main) {
+                    if (::drawerAdapter.isInitialized) {
+                        val idx = drawerAdapter.getItems().indexOfFirst { it.id == item.id }
+                        if (idx != -1) {
+                            drawerAdapter.notifyItemChanged(idx)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     fun openDrawer() {

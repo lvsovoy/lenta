@@ -87,9 +87,13 @@
     <string name="pref_loop_video">Loop videos automatically</string>
     <string name="cache_settings">Cache &amp; Storage</string>
     <string name="pref_thumbnail_cache">Thumbnail Cache</string>
-    <string name="pref_thumbnail_cache_summary">Stores generated preview thumbnails for fast browsing</string>
+    <string name="pref_thumbnail_cache_summary">Stores generated preview thumbnails and page renders for fast browsing</string>
     <string name="clear_cache">Clear Cache</string>
     <string name="cache_cleared">Thumbnail cache cleared</string>
+    <string name="pref_online_files_cache">Online Files Cache</string>
+    <string name="pref_online_files_cache_summary">Stores downloaded media files from cloud and remote sources for offline viewing and playback</string>
+    <string name="clear_online_cache">Clear Cache</string>
+    <string name="online_cache_cleared">Online files cache cleared</string>
     <string name="pref_dynamic_color">Material Dynamic Colors</string>
     <string name="pref_dynamic_color_summary">Uses dynamic system colors in file browser and settings</string>
     <string name="nav_header_title">Lenta Media Viewer</string>

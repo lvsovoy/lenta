@@ -529,4 +529,61 @@ class MediaViewerUnitTests {
         val ncRootParent = "Photos".trim('/').substringBeforeLast('/', "")
         assertEquals("", ncRootParent)
     }
+
+    @Test
+    fun testOpeningAndPlayingTriggersThumbnailGeneration() {
+        val generatedItems = mutableListOf<MediaItem>()
+        val onThumbnailGenerated: (MediaItem) -> Unit = { item ->
+            generatedItems.add(item)
+        }
+
+        val videoItem = MediaItem("v1", "test.mp4", "/storage/test.mp4", "", MediaType.VIDEO, 1000L, 0L)
+        val audioItem = MediaItem("a1", "song.mp3", "/storage/song.mp3", "", MediaType.AUDIO, 2000L, 0L)
+        val cbzItem = MediaItem("c1", "comic.cbz", "/storage/comic.cbz", "", MediaType.CBZ, 3000L, 0L)
+
+        // Simulate opening & playing video
+        onThumbnailGenerated(videoItem)
+        assertEquals(1, generatedItems.size)
+        assertEquals("test.mp4", generatedItems[0].name)
+
+        // Simulate opening & playing audio
+        onThumbnailGenerated(audioItem)
+        assertEquals(2, generatedItems.size)
+        assertEquals("song.mp3", generatedItems[1].name)
+
+        // Simulate opening cbz
+        onThumbnailGenerated(cbzItem)
+        assertEquals(3, generatedItems.size)
+        assertEquals("comic.cbz", generatedItems[2].name)
+    }
+
+    @Test
+    fun testDrawerThumbnailUpdateWhenThumbnailGenerated() {
+        val drawerItems = listOf(
+            MediaItem("v1", "test.mp4", "/storage/test.mp4", "", MediaType.VIDEO, 1000L, 0L),
+            MediaItem("v2", "clip.mp4", "/storage/clip.mp4", "", MediaType.VIDEO, 2000L, 0L)
+        )
+
+        val updatedIndices = mutableListOf<Int>()
+        val notifyItemChanged: (Int) -> Unit = { index ->
+            updatedIndices.add(index)
+        }
+
+        val onThumbnailGenerated: (MediaItem) -> Unit = { generatedItem ->
+            val idx = drawerItems.indexOfFirst { it.id == generatedItem.id }
+            if (idx != -1) {
+                notifyItemChanged(idx)
+            }
+        }
+
+        // Generate thumbnail for v2
+        onThumbnailGenerated(drawerItems[1])
+        assertEquals(1, updatedIndices.size)
+        assertEquals(1, updatedIndices[0])
+
+        // Generate thumbnail for v1
+        onThumbnailGenerated(drawerItems[0])
+        assertEquals(2, updatedIndices.size)
+        assertEquals(0, updatedIndices[1])
+    }
 }

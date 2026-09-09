@@ -23,6 +23,7 @@ import me.lesovoy.lenta.data.model.MediaItem
 import me.lesovoy.lenta.data.model.MediaType
 import me.lesovoy.lenta.data.nextcloud.NextcloudClient
 import me.lesovoy.lenta.data.nextcloud.NextcloudPreferences
+import me.lesovoy.lenta.data.thumbnail.ThumbnailManager
 import me.lesovoy.lenta.databinding.ItemMediaAudioBinding
 import me.lesovoy.lenta.databinding.ItemMediaCbzBinding
 import me.lesovoy.lenta.databinding.ItemMediaGifBinding
@@ -44,7 +45,8 @@ class MediaViewerAdapter(
     private val onVideoSkipped: (position: Int, isForward: Boolean) -> Unit,
     private val onPlaybackProgress: (position: Int, positionMs: Long, durationMs: Long, progressFraction: Float, isPlaying: Boolean) -> Unit,
     private val onComicProgress: (position: Int, currentPage: Int, totalPages: Int) -> Unit,
-    private val onSwipeRight: (() -> Unit)? = null
+    private val onSwipeRight: (() -> Unit)? = null,
+    private val onThumbnailGenerated: ((item: MediaItem) -> Unit)? = null
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
@@ -211,7 +213,20 @@ class MediaViewerAdapter(
                 binding.ivImage.load(dataToLoad) {
                     crossfade(true)
                     listener(
-                        onSuccess = { _, _ -> binding.progressLoading.visibility = View.GONE },
+                        onSuccess = { _, _ ->
+                            binding.progressLoading.visibility = View.GONE
+                            scope.launch(Dispatchers.IO) {
+                                val client = if (item.sourceId != null) {
+                                    me.lesovoy.lenta.data.source.SourceClientFactory.getClientForSourceId(binding.root.context, item.sourceId) ?: nextcloudClient
+                                } else {
+                                    nextcloudClient
+                                }
+                                ThumbnailManager.generateThumbnail(binding.root.context, item, client)
+                                withContext(Dispatchers.Main) {
+                                    onThumbnailGenerated?.invoke(item)
+                                }
+                            }
+                        },
                         onError = { _, _ -> binding.progressLoading.visibility = View.GONE }
                     )
                 }
@@ -284,9 +299,27 @@ class MediaViewerAdapter(
             binding.videoTouchOverlay.setOnTouchListener(pinchListener)
             binding.root.setOnTouchListener(pinchListener)
 
+            generateAndSaveThumbnail(item)
+
             if (isActive) {
                 initPlayer()
                 loadMedia(item)
+            }
+        }
+
+        private fun generateAndSaveThumbnail(item: MediaItem) {
+            scope.launch(Dispatchers.IO) {
+                val client = if (item.sourceId != null) {
+                    me.lesovoy.lenta.data.source.SourceClientFactory.getClientForSourceId(binding.root.context, item.sourceId) ?: nextcloudClient
+                } else {
+                    nextcloudClient
+                }
+                val thumb = ThumbnailManager.generateThumbnail(binding.root.context, item, client)
+                if (thumb != null && thumb.exists()) {
+                    withContext(Dispatchers.Main) {
+                        onThumbnailGenerated?.invoke(item)
+                    }
+                }
             }
         }
 
@@ -302,7 +335,13 @@ class MediaViewerAdapter(
                     }
                     val cached = client.downloadToCache(binding.root.context, item)
                     if (cached.isSuccess) {
-                        Uri.fromFile(cached.getOrThrow())
+                        val downloadedFile = cached.getOrThrow()
+                        ThumbnailManager.getVideoThumbnail(binding.root.context.cacheDir, downloadedFile)
+                        ThumbnailManager.generateThumbnail(binding.root.context, item, client)
+                        withContext(Dispatchers.Main) {
+                            onThumbnailGenerated?.invoke(item)
+                        }
+                        Uri.fromFile(downloadedFile)
                     } else {
                         Uri.parse(item.uriString)
                     }
@@ -343,6 +382,7 @@ class MediaViewerAdapter(
                                 Player.STATE_BUFFERING -> binding.progressVideoBuffering.visibility = View.VISIBLE
                                 Player.STATE_READY -> {
                                     binding.progressVideoBuffering.visibility = View.GONE
+                                    currentItem?.let { generateAndSaveThumbnail(it) }
                                     if (isActive && isPlaying) {
                                         startProgressUpdates()
                                     }
@@ -356,6 +396,7 @@ class MediaViewerAdapter(
 
                         override fun onIsPlayingChanged(isPlaying: Boolean) {
                             if (isPlaying && isActive) {
+                                currentItem?.let { generateAndSaveThumbnail(it) }
                                 startProgressUpdates()
                             } else if (!isPlaying) {
                                 progressJob?.cancel()
@@ -570,6 +611,17 @@ class MediaViewerAdapter(
                                     drawable.stop()
                                 }
                             }
+                            scope.launch(Dispatchers.IO) {
+                                val client = if (item.sourceId != null) {
+                                    me.lesovoy.lenta.data.source.SourceClientFactory.getClientForSourceId(binding.root.context, item.sourceId) ?: nextcloudClient
+                                } else {
+                                    nextcloudClient
+                                }
+                                ThumbnailManager.generateThumbnail(binding.root.context, item, client)
+                                withContext(Dispatchers.Main) {
+                                    onThumbnailGenerated?.invoke(item)
+                                }
+                            }
                         },
                         onError = { _, _ -> binding.progressLoading.visibility = View.GONE }
                     )
@@ -727,6 +779,19 @@ class MediaViewerAdapter(
 
                 withContext(Dispatchers.Main) {
                     binding.progressLoading.visibility = View.GONE
+                    scope.launch(Dispatchers.IO) {
+                        val client = if (item.sourceId != null) {
+                            me.lesovoy.lenta.data.source.SourceClientFactory.getClientForSourceId(binding.root.context, item.sourceId) ?: nextcloudClient
+                        } else {
+                            nextcloudClient
+                        }
+                        val cover = ThumbnailManager.generateThumbnail(binding.root.context, item, client)
+                        if (cover != null && cover.exists()) {
+                            withContext(Dispatchers.Main) {
+                                onThumbnailGenerated?.invoke(item)
+                            }
+                        }
+                    }
                     val pos = bindingAdapterPosition
                     if (pages.isNotEmpty()) {
                         val adapter = CbzPageAdapter(
@@ -927,6 +992,7 @@ class MediaViewerAdapter(
                             crossfade(true)
                             error(R.drawable.ic_audio)
                         }
+                        onThumbnailGenerated?.invoke(item)
                     } else {
                         binding.ivAlbumArt.setImageResource(R.drawable.ic_audio)
                     }
@@ -991,6 +1057,19 @@ class MediaViewerAdapter(
                             binding.progressLoading.visibility = View.GONE
                             val dur = player.duration.coerceAtLeast(0L)
                             binding.tvTimeTotal.text = formatTime(dur)
+                            scope.launch(Dispatchers.IO) {
+                                val client = if (item.sourceId != null) {
+                                    me.lesovoy.lenta.data.source.SourceClientFactory.getClientForSourceId(context, item.sourceId) ?: nextcloudClient
+                                } else {
+                                    nextcloudClient
+                                }
+                                val art = ThumbnailManager.generateThumbnail(context, item, client)
+                                if (art != null && art.exists()) {
+                                    withContext(Dispatchers.Main) {
+                                        onThumbnailGenerated?.invoke(item)
+                                    }
+                                }
+                            }
                             if (isActive && !isPaused) {
                                 player.play()
                             }

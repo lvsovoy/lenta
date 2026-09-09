@@ -9,6 +9,7 @@ import me.lesovoy.lenta.data.nextcloud.NextcloudPreferences
 import me.lesovoy.lenta.data.thumbnail.ThumbnailManager
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -110,9 +111,82 @@ class ThumbnailManagerUnitTests {
             cbzCacheDir.mkdirs()
             File(cbzCacheDir, "page1.png").writeBytes(ByteArray(1024)) // 1 KB
 
+            val docCacheDir = File(cacheDir, "doc_cache/doc1")
+            docCacheDir.mkdirs()
+            File(docCacheDir, "page1.png").writeBytes(ByteArray(512)) // 0.5 KB
+
+            val uriDocsDir = File(cacheDir, "uri_docs_cache")
+            uriDocsDir.mkdirs()
+            File(uriDocsDir, "temp.pdf").writeBytes(ByteArray(512)) // 0.5 KB
+
+            // Online files
+            val nextcloudCacheDir = File(cacheDir, "nextcloud_cache")
+            nextcloudCacheDir.mkdirs()
+            File(nextcloudCacheDir, "sample_video.mp4").writeBytes(ByteArray(16384)) // 16 KB
+
+            val remoteCacheDir = File(cacheDir, "remote_cache/gdrive_1")
+            remoteCacheDir.mkdirs()
+            File(remoteCacheDir, "sample_doc.pdf").writeBytes(ByteArray(8192)) // 8 KB
+
+            val thumbnailBytes = ThumbnailManager.getThumbnailCacheSizeBytes(cacheDir)
+            assertEquals(9216L, thumbnailBytes) // 1024 + 2048 + 4096 + 1024 + 512 + 512 = 9216 B = 9.0 KB
+            assertEquals("9.0 KB", ThumbnailManager.formatCacheSize(thumbnailBytes))
+
+            val onlineBytes = ThumbnailManager.getOnlineFilesCacheSizeBytes(cacheDir)
+            assertEquals(24576L, onlineBytes) // 16384 + 8192 = 24576 B = 24.0 KB
+            assertEquals("24.0 KB", ThumbnailManager.formatCacheSize(onlineBytes))
+
             val totalBytes = ThumbnailManager.getCacheSizeBytes(cacheDir)
-            assertEquals(8192L, totalBytes) // 1024 + 2048 + 4096 + 1024 = 8192 B = 8.0 KB
-            assertEquals("8.0 KB", ThumbnailManager.formatCacheSize(totalBytes))
+            assertEquals(33792L, totalBytes) // 9216 + 24576 = 33792 B = 33.0 KB
+            assertEquals("33.0 KB", ThumbnailManager.formatCacheSize(totalBytes))
+        } finally {
+            tempDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun testClearSeparateCaches() = runBlocking {
+        val tempDir = File(System.getProperty("java.io.tmpdir"), "clear_sep_test_${System.currentTimeMillis()}")
+        val cacheDir = File(tempDir, "cache")
+        tempDir.mkdirs()
+        cacheDir.mkdirs()
+
+        try {
+            val thumbSubDir = File(cacheDir, "thumbnail_cache/video")
+            thumbSubDir.mkdirs()
+            val thumbFile = File(thumbSubDir, "v1.jpg")
+            thumbFile.writeBytes(ByteArray(1024))
+
+            val cbzCacheDir = File(cacheDir, "cbz_cache")
+            cbzCacheDir.mkdirs()
+            val cbzFile = File(cbzCacheDir, "page1.png")
+            cbzFile.writeBytes(ByteArray(1024))
+
+            val nextcloudCacheDir = File(cacheDir, "nextcloud_cache")
+            nextcloudCacheDir.mkdirs()
+            val ncFile = File(nextcloudCacheDir, "video.mp4")
+            ncFile.writeBytes(ByteArray(4096))
+
+            val remoteCacheDir = File(cacheDir, "remote_cache/src1")
+            remoteCacheDir.mkdirs()
+            val remoteFile = File(remoteCacheDir, "photo.jpg")
+            remoteFile.writeBytes(ByteArray(2048))
+
+            // Clear only thumbnail cache
+            ThumbnailManager.clearThumbnailCache(cacheDir)
+            assertFalse(File(cacheDir, "thumbnail_cache").exists())
+            assertFalse(File(cacheDir, "cbz_cache").exists())
+            assertTrue(ncFile.exists())
+            assertTrue(remoteFile.exists())
+            assertEquals(0L, ThumbnailManager.getThumbnailCacheSizeBytes(cacheDir))
+            assertEquals(6144L, ThumbnailManager.getOnlineFilesCacheSizeBytes(cacheDir))
+
+            // Clear only online files cache
+            ThumbnailManager.clearOnlineFilesCache(cacheDir)
+            assertFalse(File(cacheDir, "nextcloud_cache").exists())
+            assertFalse(File(cacheDir, "remote_cache").exists())
+            assertEquals(0L, ThumbnailManager.getOnlineFilesCacheSizeBytes(cacheDir))
+            assertEquals(0L, ThumbnailManager.getCacheSizeBytes(cacheDir))
         } finally {
             tempDir.deleteRecursively()
         }
@@ -496,6 +570,183 @@ class ThumbnailManagerUnitTests {
             assertNotNull(cover)
             assertTrue(cover!!.exists())
             assertEquals("downloaded cbz cover data", cover.readText())
+        } finally {
+            tempDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun testSingleColorFrameDetection() {
+        // Pure black frame (0, 0, 0)
+        val blackScore = ThumbnailManager.calculateColorDifference(100, 100) { _, _ -> 0xFF000000.toInt() }
+        assertEquals(0.0, blackScore, 0.001)
+        assertTrue(ThumbnailManager.isSingleColor(blackScore))
+
+        // Pure white frame (255, 255, 255)
+        val whiteScore = ThumbnailManager.calculateColorDifference(100, 100) { _, _ -> 0xFFFFFFFF.toInt() }
+        assertEquals(0.0, whiteScore, 0.001)
+        assertTrue(ThumbnailManager.isSingleColor(whiteScore))
+
+        // Solid green frame (0, 255, 0)
+        val greenScore = ThumbnailManager.calculateColorDifference(100, 100) { _, _ -> 0xFF00FF00.toInt() }
+        assertEquals(0.0, greenScore, 0.001)
+        assertTrue(ThumbnailManager.isSingleColor(greenScore))
+
+        // Minor compression noise on black (pixels varying between 0 and 3)
+        val noiseScore = ThumbnailManager.calculateColorDifference(100, 100) { x, y ->
+            val noise = (x + y) % 4
+            (0xFF shl 24) or (noise shl 16) or (noise shl 8) or noise
+        }
+        assertTrue("Noise score should be recognized as single color, but was: $noiseScore", noiseScore < 10.0)
+        assertTrue(ThumbnailManager.isSingleColor(noiseScore))
+
+        // Colorful frame with high contrast (half red, half blue)
+        val colorfulScore = ThumbnailManager.calculateColorDifference(100, 100) { x, _ ->
+            if (x < 50) 0xFFFF0000.toInt() else 0xFF0000FF.toInt()
+        }
+        assertTrue("Colorful score should be large (> 20.0), was: $colorfulScore", colorfulScore > 20.0)
+        org.junit.Assert.assertFalse(ThumbnailManager.isSingleColor(colorfulScore))
+    }
+
+    @Test
+    fun testCandidateVideoFrameTimestampsProgressiveAdvancement() {
+        // Known duration of 60 seconds (60,000,000 us)
+        val durationUs = 60_000_000L
+        val timestamps = ThumbnailManager.getCandidateVideoFrameTimestamps(durationUs)
+
+        // Must start with early timestamps and advance strictly forward
+        assertTrue("Timestamps list must not be empty", timestamps.isNotEmpty())
+        assertTrue("Initial timestamp should be around 1-3s", timestamps.contains(1_000_000L))
+
+        // Ensure all timestamps are within duration
+        for (ts in timestamps) {
+            assertTrue("Timestamp $ts must be >= 0", ts >= 0L)
+            assertTrue("Timestamp $ts must be < duration $durationUs", ts < durationUs)
+        }
+
+        // Ensure offsets advance forward
+        val forwardPart = timestamps.takeWhile { it >= 1_000_000L }
+        for (i in 0 until forwardPart.size - 1) {
+            assertTrue("Timestamps should advance forward in time", forwardPart[i] < forwardPart[i + 1])
+        }
+    }
+
+    @Test
+    fun testCandidateVideoFrameTimestampsWithUnknownDuration() {
+        val timestamps = ThumbnailManager.getCandidateVideoFrameTimestamps(0L)
+        assertTrue("Timestamps must not be empty", timestamps.isNotEmpty())
+        assertTrue("Must include 1s initial offset", timestamps.contains(1_000_000L))
+        assertTrue("Must include 2s offset", timestamps.contains(2_000_000L))
+        assertTrue("Must include 5s offset", timestamps.contains(5_000_000L))
+    }
+
+    @Test
+    fun testGenerateThumbnailForLocalCbz() = runBlocking {
+        val tempDir = File(System.getProperty("java.io.tmpdir"), "gen_thumb_local_cbz_${System.currentTimeMillis()}")
+        val cacheDir = File(tempDir, "cache")
+        tempDir.mkdirs()
+        cacheDir.mkdirs()
+
+        try {
+            val cbzFile = File(tempDir, "comic.cbz")
+            ZipOutputStream(FileOutputStream(cbzFile)).use { zip ->
+                zip.putNextEntry(ZipEntry("01_cover.jpg"))
+                zip.write("cover data content".toByteArray())
+                zip.closeEntry()
+            }
+
+            val item = MediaItem(
+                id = "local_cbz_1",
+                name = "comic.cbz",
+                path = cbzFile.absolutePath,
+                uriString = "",
+                type = MediaType.CBZ,
+                size = cbzFile.length(),
+                dateModified = cbzFile.lastModified()
+            )
+
+            val generatedThumb = ThumbnailManager.generateThumbnail(cacheDir, item)
+            assertNotNull(generatedThumb)
+            assertTrue(generatedThumb!!.exists())
+            assertTrue(generatedThumb.length() > 0L)
+            assertEquals("cover data content", generatedThumb.readText())
+
+            // Verify it is now recognized as cached
+            assertTrue(ThumbnailManager.isThumbnailCached(cacheDir, item))
+        } finally {
+            tempDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun testGenerateThumbnailForRemoteDownloadedCbz() = runBlocking {
+        val tempDir = File(System.getProperty("java.io.tmpdir"), "gen_thumb_remote_cbz_${System.currentTimeMillis()}")
+        val cacheDir = File(tempDir, "cache")
+        val ncCacheDir = File(cacheDir, "nextcloud_cache")
+        tempDir.mkdirs()
+        cacheDir.mkdirs()
+        ncCacheDir.mkdirs()
+
+        try {
+            val item = MediaItem(
+                id = "remote_cbz_1",
+                name = "issue_remote.cbz",
+                path = "Comics/issue_remote.cbz",
+                uriString = "https://cloud.example.com/remote.php/dav/files/user/Comics/issue_remote.cbz",
+                type = MediaType.CBZ,
+                size = 5000L,
+                dateModified = 12345678L,
+                isNextcloud = true
+            )
+
+            val downloadedFile = File(ncCacheDir, "${item.id.hashCode()}_${item.name}")
+            ZipOutputStream(FileOutputStream(downloadedFile)).use { zip ->
+                zip.putNextEntry(ZipEntry("front.jpg"))
+                zip.write("remote comic front cover".toByteArray())
+                zip.closeEntry()
+            }
+
+            val generatedThumb = ThumbnailManager.generateThumbnail(cacheDir, item)
+            assertNotNull(generatedThumb)
+            assertTrue(generatedThumb!!.exists())
+            assertTrue(generatedThumb.length() > 0L)
+            assertEquals("remote comic front cover", generatedThumb.readText())
+
+            // Verify it was copied to the expected remote cache key
+            val remCacheKey = ThumbnailManager.getCbzCoverCacheKey(item)
+            val expectedCachedCover = File(ThumbnailManager.getCbzThumbnailDir(cacheDir), "${remCacheKey}.jpg")
+            assertTrue(expectedCachedCover.exists())
+            assertEquals("remote comic front cover", expectedCachedCover.readText())
+        } finally {
+            tempDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun testGenerateThumbnailForLocalImage() = runBlocking {
+        val tempDir = File(System.getProperty("java.io.tmpdir"), "gen_thumb_image_${System.currentTimeMillis()}")
+        val cacheDir = File(tempDir, "cache")
+        tempDir.mkdirs()
+        cacheDir.mkdirs()
+
+        try {
+            val imgFile = File(tempDir, "photo.jpg")
+            imgFile.writeText("sample photo bytes")
+
+            val item = MediaItem(
+                id = "local_img_1",
+                name = "photo.jpg",
+                path = imgFile.absolutePath,
+                uriString = "",
+                type = MediaType.IMAGE,
+                size = imgFile.length(),
+                dateModified = imgFile.lastModified()
+            )
+
+            val generatedThumb = ThumbnailManager.generateThumbnail(cacheDir, item)
+            assertNotNull(generatedThumb)
+            assertTrue(generatedThumb!!.exists())
+            assertEquals(imgFile.absolutePath, generatedThumb.absolutePath)
         } finally {
             tempDir.deleteRecursively()
         }

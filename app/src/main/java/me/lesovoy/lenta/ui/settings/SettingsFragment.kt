@@ -160,8 +160,10 @@ class SettingsFragment : Fragment() {
 
     private fun updateCacheSizeDisplay() {
         viewLifecycleOwner.lifecycleScope.launch {
-            val size = ThumbnailManager.getCacheSizeBytes(requireContext())
-            binding.tvCacheSize.text = ThumbnailManager.formatCacheSize(size)
+            val thumbSize = ThumbnailManager.getThumbnailCacheSizeBytes(requireContext())
+            binding.tvCacheSize.text = ThumbnailManager.formatCacheSize(thumbSize)
+            val onlineSize = ThumbnailManager.getOnlineFilesCacheSizeBytes(requireContext())
+            binding.tvOnlineCacheSize.text = ThumbnailManager.formatCacheSize(onlineSize)
         }
     }
 
@@ -190,9 +192,17 @@ class SettingsFragment : Fragment() {
 
         binding.btnClearCache.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
-                ThumbnailManager.clearCache(requireContext())
+                ThumbnailManager.clearThumbnailCache(requireContext())
                 updateCacheSizeDisplay()
                 Snackbar.make(binding.root, R.string.cache_cleared, Snackbar.LENGTH_SHORT).show()
+            }
+        }
+
+        binding.btnClearOnlineCache.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+                ThumbnailManager.clearOnlineFilesCache(requireContext())
+                updateCacheSizeDisplay()
+                Snackbar.make(binding.root, R.string.online_cache_cleared, Snackbar.LENGTH_SHORT).show()
             }
         }
 
