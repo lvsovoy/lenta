@@ -7,6 +7,7 @@ import me.lesovoy.lenta.data.source.StorageSourceNaming
 import me.lesovoy.lenta.data.source.StorageSourceType
 import me.lesovoy.lenta.data.source.ftp.FtpClient
 import me.lesovoy.lenta.data.source.gdrive.GoogleDriveClient
+import me.lesovoy.lenta.data.source.oauth.GoogleSignInHelper
 import me.lesovoy.lenta.data.source.oauth.OAuthConfig
 import me.lesovoy.lenta.data.source.oauth.OAuthHelper
 import me.lesovoy.lenta.data.source.oauth.OAuthProviderConfig
@@ -494,7 +495,7 @@ class StorageSourcesUnitTests {
     @Test
     fun testOAuthConfigDefaultsAndOverrides() {
         // Test default configurations
-        assertEquals("71813476288-0l2l8k1g7351vhj9q8oem6b3j7e3o8u1.apps.googleusercontent.com", OAuthConfig.DEFAULT_GOOGLE.clientId)
+        assertEquals("767261370439-u6iul4fgpeqj8daudasn680g22h54jgd.apps.googleusercontent.com", OAuthConfig.DEFAULT_GOOGLE.clientId)
         assertEquals("me.lesovoy.lenta://oauth2callback", OAuthConfig.DEFAULT_GOOGLE.redirectUri)
         assertTrue(OAuthConfig.DEFAULT_GOOGLE.scopes.contains("drive.readonly"))
         assertEquals("https://accounts.google.com/o/oauth2/v2/auth", OAuthConfig.DEFAULT_GOOGLE.authEndpoint)
@@ -544,5 +545,19 @@ class StorageSourcesUnitTests {
         assertTrue(OAuthConfig.webLogin.userAgent.contains("Chrome/"))
         assertEquals(15L, OAuthConfig.webLogin.connectTimeoutSeconds)
         assertEquals(15L, OAuthConfig.webLogin.readTimeoutSeconds)
+    }
+
+    @Test
+    fun testGoogleSignInHelperConfiguration() {
+        assertEquals("https://www.googleapis.com/auth/drive.readonly", GoogleSignInHelper.DRIVE_READONLY_SCOPE)
+        assertEquals("https://www.googleapis.com/auth/drive.file", GoogleSignInHelper.DRIVE_FILE_SCOPE)
+        assertEquals("https://www.googleapis.com/auth/userinfo.email", GoogleSignInHelper.USERINFO_EMAIL_SCOPE)
+        assertEquals("https://www.googleapis.com/auth/userinfo.profile", GoogleSignInHelper.USERINFO_PROFILE_SCOPE)
+
+        assertTrue(GoogleSignInHelper.OAUTH2_SCOPE_STRING.startsWith("oauth2:"))
+        assertTrue(GoogleSignInHelper.OAUTH2_SCOPE_STRING.contains(GoogleSignInHelper.DRIVE_READONLY_SCOPE))
+        assertTrue(GoogleSignInHelper.OAUTH2_SCOPE_STRING.contains(GoogleSignInHelper.DRIVE_FILE_SCOPE))
+        assertTrue(GoogleSignInHelper.OAUTH2_SCOPE_STRING.contains(GoogleSignInHelper.USERINFO_EMAIL_SCOPE))
+        assertTrue(GoogleSignInHelper.OAUTH2_SCOPE_STRING.contains(GoogleSignInHelper.USERINFO_PROFILE_SCOPE))
     }
 }

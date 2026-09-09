@@ -34,7 +34,7 @@ object OAuthConfig {
      * Default Google Drive OAuth2 Developer Configuration.
      */
     val DEFAULT_GOOGLE = OAuthProviderConfig(
-        clientId = "71813476288-0l2l8k1g7351vhj9q8oem6b3j7e3o8u1.apps.googleusercontent.com",
+        clientId = "767261370439-u6iul4fgpeqj8daudasn680g22h54jgd.apps.googleusercontent.com",
         redirectUri = "me.lesovoy.lenta://oauth2callback",
         scopes = "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
         authEndpoint = "https://accounts.google.com/o/oauth2/v2/auth",

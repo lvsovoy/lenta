@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.androidx.preference)
     implementation(libs.zxing.embedded)
     implementation(libs.zxing.core)
+    implementation(libs.play.services.auth)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)

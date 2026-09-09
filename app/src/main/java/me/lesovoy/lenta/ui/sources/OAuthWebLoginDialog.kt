@@ -24,7 +24,7 @@ import me.lesovoy.lenta.databinding.DialogOauthWebLoginBinding
 import kotlinx.coroutines.launch
 
 class OAuthWebLoginDialog(
-    private val sourceType: StorageSourceType = StorageSourceType.GOOGLE_DRIVE,
+    private val sourceType: StorageSourceType = StorageSourceType.ONEDRIVE,
     private val onAuthSuccess: ((token: String, accountName: String) -> Unit)? = null
 ) : DialogFragment() {
 
@@ -59,12 +59,10 @@ class OAuthWebLoginDialog(
         super.onViewCreated(view, savedInstanceState)
 
         val title = when (sourceType) {
-            StorageSourceType.GOOGLE_DRIVE -> "Google Drive Sign In"
             StorageSourceType.ONEDRIVE -> "Microsoft OneDrive Sign In"
             else -> "Web Sign In"
         }
         val subtitle = when (sourceType) {
-            StorageSourceType.GOOGLE_DRIVE -> "Log in with your Google Account"
             StorageSourceType.ONEDRIVE -> "Log in with your Microsoft Account"
             else -> "Web Authentication"
         }
@@ -176,7 +174,6 @@ class OAuthWebLoginDialog(
         lifecycleScope.launch {
             val profileResult = OAuthHelper.fetchUserProfile(sourceType, token)
             val accountName = profileResult.getOrNull() ?: when (sourceType) {
-                StorageSourceType.GOOGLE_DRIVE -> "Google Drive Account"
                 StorageSourceType.ONEDRIVE -> "OneDrive Account"
                 else -> "Cloud Account"
             }
