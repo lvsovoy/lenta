@@ -114,8 +114,8 @@
                 android:id="@+id/btn_audio_replay_5"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Replay 5s"
+                android:background="@drawable/bg_circle_button"
+                android:contentDescription="Replay"
                 android:src="@drawable/ic_replay_5"
                 app:tint="@color/white" />
 
@@ -133,8 +133,8 @@
                 android:id="@+id/btn_audio_forward_5"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Forward 5s"
+                android:background="@drawable/bg_circle_button"
+                android:contentDescription="Forward"
                 android:src="@drawable/ic_forward_5"
                 app:tint="@color/white" />
         </LinearLayout>
@@ -145,6 +145,6 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_gravity="center"
-        android:indeterminateTint="@color/white"
+        android:indeterminateTint="?attr/colorPrimary"
         android:visibility="gone" />
 </FrameLayout>

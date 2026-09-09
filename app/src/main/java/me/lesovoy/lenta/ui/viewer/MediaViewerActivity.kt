@@ -9,17 +9,20 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
-import android.widget.SeekBar
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.slider.LabelFormatter
+import com.google.android.material.slider.Slider
 import me.lesovoy.lenta.R
 import me.lesovoy.lenta.data.local.LocalMediaRepository
 import me.lesovoy.lenta.data.local.MediaIntentResolver
@@ -40,6 +43,7 @@ class MediaViewerActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_MEDIA_ITEMS = "extra_media_items"
         const val EXTRA_START_POSITION = "extra_start_position"
+        const val AUTO_HIDE_DELAY_MS = 3000L
 
         fun createIntent(context: Context, items: List<MediaItem>, startPosition: Int): Intent {
             return Intent(context, MediaViewerActivity::class.java).apply {
@@ -61,6 +65,30 @@ class MediaViewerActivity : AppCompatActivity() {
             }
             return Pair(targetOrientation, shouldGoToLandscape)
         }
+
+        fun formatTime(millis: Long): String {
+            val totalSecs = (millis / 1000).coerceAtLeast(0)
+            val mins = totalSecs / 60
+            val secs = totalSecs % 60
+            return String.format("%02d:%02d", mins, secs)
+        }
+
+        fun formatVideoScrubTime(sliderValue: Float, durationMs: Long): String {
+            val targetMs = ((sliderValue / 1000f) * durationMs).toLong()
+            return if (durationMs > 0) {
+                "${formatTime(targetMs)} / ${formatTime(durationMs)}"
+            } else {
+                formatTime(targetMs)
+            }
+        }
+
+        fun formatPaginatedScrubPage(page: Int, totalPages: Int): String {
+            return if (totalPages > 0) {
+                "$page / $totalPages"
+            } else {
+                "$page"
+            }
+        }
     }
 
     private lateinit var binding: ActivityMediaViewerBinding
@@ -74,6 +102,10 @@ class MediaViewerActivity : AppCompatActivity() {
     private var isMuted = true
     private var isUserScrubbing = false
     private var isLandscape = false
+    private var isPlaybackActive = false
+    private var controlsWereHiddenOnDown = false
+    private var currentDurationMs: Long = 0L
+    private var lastTotalPages = 0
 
     private var currentDrawerPath: String = ""
     private var isDrawerNextcloud: Boolean = false
@@ -81,6 +113,7 @@ class MediaViewerActivity : AppCompatActivity() {
     private var drawerLoadingJob: Job? = null
 
     private val handler = Handler(Looper.getMainLooper())
+    private val hideControlsRunnable = Runnable { hideControls() }
     private var activeViewHolder: MediaViewerAdapter.BaseMediaViewHolder? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -154,11 +187,21 @@ class MediaViewerActivity : AppCompatActivity() {
             onVideoSkipped = { pos, isForward ->
                 if (pos == currentPosition) {
                     showSkipIndicator(isForward)
+                    if (isPlaybackActive) {
+                        scheduleAutoHide()
+                    }
                 }
             },
             onPlaybackProgress = { itemPos, posMs, durationMs, fraction, isPlaying ->
-                if (itemPos == currentPosition && !isUserScrubbing) {
-                    updatePlaybackProgress(posMs, durationMs, fraction)
+                if (itemPos == currentPosition) {
+                    val wasPlaying = isPlaybackActive
+                    isPlaybackActive = isPlaying
+                    if (!isUserScrubbing) {
+                        updatePlaybackProgress(posMs, durationMs, fraction)
+                    }
+                    if (isPlaying && !wasPlaying && areControlsVisible() && !isUserScrubbing && !binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                        scheduleAutoHide()
+                    }
                 }
             },
             onComicProgress = { itemPos, currentPg, totalPgs ->
@@ -187,6 +230,9 @@ class MediaViewerActivity : AppCompatActivity() {
         binding.mediaViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 currentPosition = position
+                isPlaybackActive = false
+                cancelAutoHide()
+                showControls(animate = false)
                 adapter.setActivePosition(position)
                 activeViewHolder = adapter.getViewHolderAt(position)
                 updateUiForMediaType(mediaList.getOrNull(position)?.type)
@@ -202,7 +248,7 @@ class MediaViewerActivity : AppCompatActivity() {
         setupDrawer()
 
         // Setup Bottom Scrubbing Bar
-        setupSeekBar()
+        setupSlider()
 
         // Initial media type UI config
         updateUiForMediaType(mediaList.getOrNull(currentPosition)?.type)
@@ -256,6 +302,19 @@ class MediaViewerActivity : AppCompatActivity() {
         binding.btnDrawerUp.setOnClickListener {
             navigateDrawerUp()
         }
+
+        binding.drawerLayout.addDrawerListener(object : DrawerLayout.SimpleDrawerListener() {
+            override fun onDrawerOpened(drawerView: View) {
+                cancelAutoHide()
+                showControls(animate = false)
+            }
+
+            override fun onDrawerClosed(drawerView: View) {
+                if (isPlaybackActive) {
+                    scheduleAutoHide()
+                }
+            }
+        })
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -441,53 +500,125 @@ class MediaViewerActivity : AppCompatActivity() {
         when (type) {
             MediaType.IMAGE -> {
                 binding.bottomScrubberContainer.visibility = View.GONE
+                cancelAutoHide()
             }
             MediaType.VIDEO, MediaType.GIF, MediaType.AUDIO -> {
                 binding.bottomScrubberContainer.visibility = View.VISIBLE
-                binding.tvScrubInfo.visibility = View.GONE
-                binding.bottomSeekBar.progress = 0
+                configureSlider(
+                    valueFrom = 0f,
+                    valueTo = 1000f,
+                    stepSize = 0f,
+                    value = 0f,
+                    tickVisible = false,
+                    labelBehavior = LabelFormatter.LABEL_FLOATING
+                )
+                binding.bottomSlider.setLabelFormatter { value ->
+                    formatVideoScrubTime(value, currentDurationMs)
+                }
             }
             MediaType.CBZ, MediaType.DOCUMENT, MediaType.EBOOK, MediaType.PRESENTATION -> {
                 binding.bottomScrubberContainer.visibility = View.VISIBLE
-                binding.tvScrubInfo.visibility = View.VISIBLE
-                binding.bottomSeekBar.progress = 0
+                cancelAutoHide()
+                configureSlider(
+                    valueFrom = 0f,
+                    valueTo = 1f,
+                    stepSize = 1f,
+                    value = 0f,
+                    tickVisible = false,
+                    labelBehavior = LabelFormatter.LABEL_FLOATING
+                )
+                binding.bottomSlider.setLabelFormatter { value ->
+                    formatPaginatedScrubPage(value.toInt(), lastTotalPages)
+                }
             }
             null -> {
                 binding.bottomScrubberContainer.visibility = View.GONE
+                cancelAutoHide()
             }
         }
     }
 
-    private fun setupSeekBar() {
-        binding.bottomSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    val fraction = progress / 1000f
-                    val currentType = mediaList.getOrNull(currentPosition)?.type
-                    val holder = adapter.getViewHolderAt(currentPosition)
+    private fun configureSlider(
+        valueFrom: Float,
+        valueTo: Float,
+        stepSize: Float,
+        value: Float,
+        tickVisible: Boolean,
+        labelBehavior: Int = LabelFormatter.LABEL_FLOATING
+    ) {
+        val safeValueTo = if (valueTo <= valueFrom) valueFrom + 1f else valueTo
+        val safeStepSize = if (safeValueTo - valueFrom < stepSize) 0f else stepSize
+        val safeValue = value.coerceIn(valueFrom, safeValueTo)
+        val slider = binding.bottomSlider
 
-                    holder?.seekTo(fraction)
+        if (slider.valueFrom == valueFrom && slider.valueTo == safeValueTo &&
+            slider.stepSize == safeStepSize && slider.isTickVisible == tickVisible &&
+            slider.labelBehavior == labelBehavior
+        ) {
+            if (!isUserScrubbing) {
+                slider.value = safeValue
+            }
+            return
+        }
 
-                    if (!isPaginatedMediaType(currentType)) {
-                        binding.tvScrubInfo.visibility = View.VISIBLE
+        slider.stepSize = 0f
+        if (valueFrom < slider.valueFrom) {
+            slider.valueFrom = valueFrom
+        }
+        if (safeValueTo > slider.valueTo) {
+            slider.valueTo = safeValueTo
+        }
+        slider.value = safeValue
+        if (valueFrom > slider.valueFrom) {
+            slider.valueFrom = valueFrom
+        }
+        if (safeValueTo < slider.valueTo) {
+            slider.valueTo = safeValueTo
+        }
+        slider.stepSize = safeStepSize
+        slider.isTickVisible = tickVisible
+        slider.labelBehavior = labelBehavior
+        slider.value = safeValue
+    }
+
+    private fun setupSlider() {
+        binding.bottomSlider.setLabelFormatter { value ->
+            val currentType = mediaList.getOrNull(currentPosition)?.type
+            if (isPaginatedMediaType(currentType)) {
+                formatPaginatedScrubPage(value.toInt(), lastTotalPages)
+            } else {
+                formatVideoScrubTime(value, currentDurationMs)
+            }
+        }
+        binding.bottomSlider.addOnChangeListener { _, value, fromUser ->
+            if (fromUser) {
+                val currentType = mediaList.getOrNull(currentPosition)?.type
+                val holder = adapter.getViewHolderAt(currentPosition)
+
+                if (isPaginatedMediaType(currentType)) {
+                    if (lastTotalPages > 1) {
+                        val fraction = (value - 1f) / (lastTotalPages - 1f)
+                        holder?.seekTo(fraction.coerceIn(0f, 1f))
+                    } else if (lastTotalPages == 1) {
+                        holder?.seekTo(0f)
                     }
+                } else {
+                    val fraction = value / 1000f
+                    holder?.seekTo(fraction.coerceIn(0f, 1f))
                 }
             }
+        }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+        binding.bottomSlider.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
+            override fun onStartTrackingTouch(slider: Slider) {
                 isUserScrubbing = true
-                binding.tvScrubInfo.visibility = View.VISIBLE
+                cancelAutoHide()
             }
 
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            override fun onStopTrackingTouch(slider: Slider) {
                 isUserScrubbing = false
-                val currentType = mediaList.getOrNull(currentPosition)?.type
-                if (!isPaginatedMediaType(currentType)) {
-                    handler.postDelayed({
-                        if (!isUserScrubbing) {
-                            binding.tvScrubInfo.visibility = View.GONE
-                        }
-                    }, 1500)
+                if (isPlaybackActive) {
+                    scheduleAutoHide()
                 }
             }
         })
@@ -496,23 +627,42 @@ class MediaViewerActivity : AppCompatActivity() {
     private fun updatePlaybackProgress(posMs: Long, durationMs: Long, fraction: Float) {
         val currentType = mediaList.getOrNull(currentPosition)?.type
         if (currentType == MediaType.VIDEO || currentType == MediaType.GIF || currentType == MediaType.AUDIO) {
-            binding.bottomSeekBar.progress = (fraction * 1000).toInt()
-            val posStr = formatTime(posMs)
-            val durStr = formatTime(durationMs)
-            binding.tvScrubInfo.text = "$posStr / $durStr"
+            currentDurationMs = durationMs
+            if (!isUserScrubbing) {
+                val progressVal = (fraction * 1000f).coerceIn(0f, 1000f)
+                binding.bottomSlider.value = progressVal
+            }
         }
     }
 
     private fun updateComicProgress(currentPage: Int, totalPages: Int) {
-        val fraction = if (totalPages > 0) currentPage.toFloat() / totalPages.toFloat() else 0f
-        if (!isUserScrubbing) {
-            binding.bottomSeekBar.progress = (fraction * 1000).toInt()
-        }
-        if (totalPages > 0) {
-            binding.tvScrubInfo.text = getString(R.string.page_counter, currentPage, totalPages)
-            binding.tvScrubInfo.visibility = View.VISIBLE
-        } else {
-            binding.tvScrubInfo.visibility = View.GONE
+        lastTotalPages = totalPages
+        if (totalPages > 1) {
+            val maxVal = totalPages.toFloat()
+            val targetVal = currentPage.toFloat().coerceIn(1f, maxVal)
+            configureSlider(
+                valueFrom = 1f,
+                valueTo = maxVal,
+                stepSize = 1f,
+                value = targetVal,
+                tickVisible = true,
+                labelBehavior = LabelFormatter.LABEL_FLOATING
+            )
+            binding.bottomSlider.setLabelFormatter { value ->
+                formatPaginatedScrubPage(value.toInt(), totalPages)
+            }
+        } else if (totalPages == 1) {
+            configureSlider(
+                valueFrom = 0f,
+                valueTo = 1f,
+                stepSize = 1f,
+                value = 1f,
+                tickVisible = false,
+                labelBehavior = LabelFormatter.LABEL_FLOATING
+            )
+            binding.bottomSlider.setLabelFormatter {
+                formatPaginatedScrubPage(1, 1)
+            }
         }
     }
 
@@ -531,8 +681,21 @@ class MediaViewerActivity : AppCompatActivity() {
         val currentType = mediaList.getOrNull(position)?.type
 
         if (currentType == MediaType.VIDEO || currentType == MediaType.GIF || currentType == MediaType.AUDIO) {
+            if (controlsWereHiddenOnDown) {
+                if (isPlaybackActive) {
+                    scheduleAutoHide()
+                }
+                return
+            }
             val isNowPlaying = holder.togglePlayPause()
+            isPlaybackActive = isNowPlaying
             showCenterIndicator(isNowPlaying)
+            if (isNowPlaying) {
+                scheduleAutoHide()
+            } else {
+                cancelAutoHide()
+                showControls()
+            }
         } else {
             // For images or comics, toggle visibility of overlays
             toggleOverlayVisibility()
@@ -540,23 +703,98 @@ class MediaViewerActivity : AppCompatActivity() {
     }
 
     private fun toggleOverlayVisibility() {
-        val visible = binding.topControls.visibility == View.VISIBLE
-        if (visible) {
-            binding.topControls.animate().alpha(0f).setDuration(200).withEndAction {
+        if (areControlsVisible()) {
+            hideControls()
+        } else {
+            showControls()
+        }
+    }
+
+    fun areControlsVisible(): Boolean {
+        return binding.topControls.visibility == View.VISIBLE && binding.topControls.alpha > 0.5f
+    }
+
+    fun scheduleAutoHide(delayMs: Long = AUTO_HIDE_DELAY_MS) {
+        cancelAutoHide()
+        if (!isPlaybackActive || isUserScrubbing || binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            return
+        }
+        handler.postDelayed(hideControlsRunnable, delayMs)
+    }
+
+    fun cancelAutoHide() {
+        handler.removeCallbacks(hideControlsRunnable)
+    }
+
+    fun showControls(animate: Boolean = true) {
+        binding.topControls.animate().cancel()
+        binding.bottomScrubberContainer.animate().cancel()
+
+        val currentType = mediaList.getOrNull(currentPosition)?.type
+
+        binding.topControls.visibility = View.VISIBLE
+        if (currentType != MediaType.IMAGE) {
+            binding.bottomScrubberContainer.visibility = View.VISIBLE
+        }
+
+        if (animate) {
+            binding.topControls.animate().alpha(1f).setDuration(200).start()
+            if (currentType != MediaType.IMAGE) {
+                binding.bottomScrubberContainer.animate().alpha(1f).setDuration(200).start()
+            }
+        } else {
+            binding.topControls.alpha = 1f
+            if (currentType != MediaType.IMAGE) {
+                binding.bottomScrubberContainer.alpha = 1f
+            }
+        }
+
+        if (isPlaybackActive && !isUserScrubbing && !binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            scheduleAutoHide()
+        }
+    }
+
+    fun hideControls(animate: Boolean = true) {
+        if (isUserScrubbing || binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            return
+        }
+        cancelAutoHide()
+
+        if (animate) {
+            binding.topControls.animate().cancel()
+            binding.bottomScrubberContainer.animate().cancel()
+
+            binding.topControls.animate().alpha(0f).setDuration(250).withEndAction {
                 binding.topControls.visibility = View.GONE
             }.start()
-            binding.bottomScrubberContainer.animate().alpha(0f).setDuration(200).withEndAction {
+
+            binding.bottomScrubberContainer.animate().alpha(0f).setDuration(250).withEndAction {
                 binding.bottomScrubberContainer.visibility = View.GONE
             }.start()
         } else {
-            binding.topControls.visibility = View.VISIBLE
-            binding.topControls.animate().alpha(1f).setDuration(200).start()
-            val currentType = mediaList.getOrNull(currentPosition)?.type
-            if (currentType != MediaType.IMAGE) {
-                binding.bottomScrubberContainer.visibility = View.VISIBLE
-                binding.bottomScrubberContainer.animate().alpha(1f).setDuration(200).start()
+            binding.topControls.alpha = 0f
+            binding.topControls.visibility = View.GONE
+            binding.bottomScrubberContainer.alpha = 0f
+            binding.bottomScrubberContainer.visibility = View.GONE
+        }
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        when (ev.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                controlsWereHiddenOnDown = !areControlsVisible()
+                if (controlsWereHiddenOnDown) {
+                    showControls()
+                }
+                cancelAutoHide()
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                if (isPlaybackActive && !isUserScrubbing && !binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    scheduleAutoHide()
+                }
             }
         }
+        return super.dispatchTouchEvent(ev)
     }
 
     private fun showCenterIndicator(isPlaying: Boolean) {
@@ -675,11 +913,18 @@ class MediaViewerActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         hideSystemBars()
-        adapter.getViewHolderAt(currentPosition)?.onActive()
+        adapter.getViewHolderAt(currentPosition)?.let { holder ->
+            holder.onActive()
+            isPlaybackActive = holder.isPlaying()
+            if (isPlaybackActive) {
+                scheduleAutoHide()
+            }
+        }
     }
 
     override fun onPause() {
         super.onPause()
+        cancelAutoHide()
         adapter.getViewHolderAt(currentPosition)?.onInactive()
     }
 
@@ -691,6 +936,7 @@ class MediaViewerActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        cancelAutoHide()
         drawerLoadingJob?.cancel()
         drawerLoadingJob = null
         if (::adapter.isInitialized) {

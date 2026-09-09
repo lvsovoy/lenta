@@ -18,7 +18,14 @@ class AudioWaveformView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
     private val playedPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#BB86FC")
+        val typedValue = android.util.TypedValue()
+        val theme = context.theme
+        val primaryColor = if (theme.resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true)) {
+            typedValue.data
+        } else {
+            Color.parseColor("#BB86FC")
+        }
+        color = primaryColor
         style = Paint.Style.FILL
     }
 

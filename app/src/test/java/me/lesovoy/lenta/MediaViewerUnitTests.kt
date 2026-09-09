@@ -642,4 +642,80 @@ class MediaViewerUnitTests {
         assertEquals(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, target2)
         assertFalse(isLandscape2)
     }
+
+    @Test
+    fun testPaginatedSliderPageAndFractionConversions() {
+        val totalPages = 10
+
+        // Drag to page 1 -> fraction 0.0
+        val page1 = 1f
+        val fraction1 = (page1 - 1f) / (totalPages - 1f)
+        assertEquals(0f, fraction1, 0.001f)
+        val targetPage1 = ((totalPages - 1) * fraction1).toInt()
+        assertEquals(0, targetPage1) // 0-based index
+
+        // Drag to page 5 -> fraction 4/9
+        val page5 = 5f
+        val fraction5 = (page5 - 1f) / (totalPages - 1f)
+        assertEquals(4f / 9f, fraction5, 0.001f)
+        val targetPage5 = ((totalPages - 1) * fraction5).toInt()
+        assertEquals(4, targetPage5) // 0-based index = 4 (Page 5)
+
+        // Drag to page 10 -> fraction 1.0
+        val page10 = 10f
+        val fraction10 = (page10 - 1f) / (totalPages - 1f)
+        assertEquals(1f, fraction10, 0.001f)
+        val targetPage10 = ((totalPages - 1) * fraction10).toInt()
+        assertEquals(9, targetPage10) // 0-based index = 9 (Page 10)
+    }
+
+    @Test
+    fun testPaginatedSliderValueIndicatorFormatting() {
+        assertEquals("1 / 10", me.lesovoy.lenta.ui.viewer.MediaViewerActivity.formatPaginatedScrubPage(1, 10))
+        assertEquals("5 / 10", me.lesovoy.lenta.ui.viewer.MediaViewerActivity.formatPaginatedScrubPage(5, 10))
+        assertEquals("10 / 10", me.lesovoy.lenta.ui.viewer.MediaViewerActivity.formatPaginatedScrubPage(10, 10))
+        assertEquals("1 / 1", me.lesovoy.lenta.ui.viewer.MediaViewerActivity.formatPaginatedScrubPage(1, 1))
+        assertEquals("42", me.lesovoy.lenta.ui.viewer.MediaViewerActivity.formatPaginatedScrubPage(42, 0))
+    }
+
+    @Test
+    fun testVideoSliderValueIndicatorFormatting() {
+        val durationMs = 90000L // 01:30
+
+        // Start at 0%
+        val labelStart = me.lesovoy.lenta.ui.viewer.MediaViewerActivity.formatVideoScrubTime(0f, durationMs)
+        assertEquals("00:00 / 01:30", labelStart)
+
+        // Middle at 50%
+        val labelMid = me.lesovoy.lenta.ui.viewer.MediaViewerActivity.formatVideoScrubTime(500f, durationMs)
+        assertEquals("00:45 / 01:30", labelMid)
+
+        // End at 100%
+        val labelEnd = me.lesovoy.lenta.ui.viewer.MediaViewerActivity.formatVideoScrubTime(1000f, durationMs)
+        assertEquals("01:30 / 01:30", labelEnd)
+
+        // Unknown duration (0)
+        val labelZeroDur = me.lesovoy.lenta.ui.viewer.MediaViewerActivity.formatVideoScrubTime(500f, 0L)
+        assertEquals("00:00", labelZeroDur)
+    }
+
+    @Test
+    fun testPaginatedSliderTicksVisibility() {
+        val hasTicksForMultiPage = { totalPages: Int -> totalPages > 1 }
+        val getStepSize = { totalPages: Int -> if (totalPages > 1) 1f else 0f }
+
+        assertTrue(hasTicksForMultiPage(5))
+        assertEquals(1f, getStepSize(5), 0.001f)
+
+        assertTrue(hasTicksForMultiPage(2))
+        assertEquals(1f, getStepSize(2), 0.001f)
+
+        assertFalse(hasTicksForMultiPage(1))
+        assertFalse(hasTicksForMultiPage(0))
+    }
+
+    @Test
+    fun testAutoHidePlaybackConstants() {
+        assertEquals(3000L, me.lesovoy.lenta.ui.viewer.MediaViewerActivity.AUTO_HIDE_DELAY_MS)
+    }
 }
